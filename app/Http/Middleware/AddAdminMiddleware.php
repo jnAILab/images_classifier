@@ -51,10 +51,12 @@ class AddAdminMiddleware
 		$employeeId=$request->input('sendEmployeeId');
 		
 		//查找用户名，用于判断用户名是否存在
-		$name_result = Users::select('name')
+		$name_result = User::select('name')
 			->where('name',$username)
 			->first();
-		
+		$email_result = Users::select('email')
+			->where('email',$email)
+			->first();
 		//输入判断
 		if($username==''){
 			return ['resultCode'=>'0','remind'=>'请输入用户名'];
@@ -72,6 +74,8 @@ class AddAdminMiddleware
 			return ['resultCode' => '0','remind' =>"请输入邮箱"];
 		}elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)){
 			return ['resultCode' => '0','remind' =>"输入邮箱不合法"];
+		}elseif($email_result!=null){
+			return ['resultCode' => '0', "remind" => '邮箱已经被注册'];
 		}elseif($employeeId==''){
 			return ['resultCode'=>'0','remind' => '请输入工号'];
 		}elseif(strlen($employeeId)>6){

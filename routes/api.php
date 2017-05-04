@@ -55,27 +55,27 @@ $api->version('v1', function ($api) {
 	*/
 	//创建一个任务
 	$api->post('/createTask',[
-		'uses' => 'TaskController@createTasks',
+		'uses' => 'App\Http\Controllers\TaskController@createTasks',
 		'middleware' => 'createOneTask',
 	]);
 
 	//查看一个任务信息
 	$api->post('/taskInformation',[
-		'uses' => 'TaskController@getTasks',
+		'uses' => 'App\Http\Controllers\TaskController@getTasks',
 	]);
 
 	//查看任务列表
 	$api->post('/taskList',[
-		'uses' => 'TaskController@getTaskList',
+		'uses' => 'App\Http\Controllers\TaskController@getTaskList',
 	]);
 	//更新一个任务信息
 	$api->post('/updateTask',[
-		'uses' => 'TaskController@updateTask',
+		'uses' => 'App\Http\Controllers\TaskController@updateTask',
 	]);
 		
 	//删除任务信息（可批量）
 	$api->post('/delectTask',[
-		'uses' => 'TaskController@delectTask',
+		'uses' => 'App\Http\Controllers\TaskController@delectTask',
 	]);
 
 
@@ -100,7 +100,8 @@ $api->version('v1', function ($api) {
 		'uses'=>'App\Http\Controllers\CategoryController@getCategoryList'
 	]);
 	$api->post('storegetCategories',[
-		'uses'=>'App\Http\Controllers\CategoryController@storegetCategories'
+		'uses'=>'App\Http\Controllers\CategoryController@storegetCategories',
+		'middleware'=>'storeCategory'
 	]);
 	$api->post('updateCategoryNames',[
 		'uses'=>'App\Http\Controllers\CategoryController@updateCategoryNames'

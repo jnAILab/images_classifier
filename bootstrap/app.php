@@ -144,7 +144,9 @@ $app->routeMiddleware([
 	//添加管理员
 	'addAdmin' => App\Http\Middleware\AddAdminMiddleware::class,
 	//创建一个任务
-	'createOneTask' => App\Http\Middleware\CreateOneTask::class,
+	'createOneTask' => App\Http\Middleware\CreateOneTaskMiddleware::class,
+	//图片类型
+	'storeCategory' => App\Http\Middleware\Categorymiddleware::class,
 ]);
 
 return $app;

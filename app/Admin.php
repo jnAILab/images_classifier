@@ -28,17 +28,15 @@
 		public function addAdministrator($username,$password,$email,$employeeId){
 			
 			//向user表插入信息
-			$create_at=date('Y-m-d H:i:s',time());//格式化时间
-			$id = User::insertGetId([
+			$result_insert= User::insert([
 				'name' => $username,
 				'password' => md5($password),
 				'email' => $email,
 				'remember_token' => $username,
 				'status' => 'admin',
-				'created_at' => $create_at,
 			]);
 			//将users表自增id加密后作为user_id插入users表和admin表
-			$user_id=md5($id);
+			$user_id=uniqid();
 			$result_information = User::where('auto_id',$id)->update([
 				'user_id'=>$user_id,
 			]);
@@ -48,7 +46,7 @@
 			]);
 			
 			//判断信息是否插入成功
-			if ($user_id&&$result_information&&$result_admin){
+			if ($result_insert&&$result_information&&$result_admin){
 				$resultCode=0;
 				$resultMsg='添加管理员成功';
 			}else{
