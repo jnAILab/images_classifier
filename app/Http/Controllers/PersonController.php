@@ -21,17 +21,17 @@ class PersonController extends Controller
 		*/
     public function changePassword(Request $request){
         $json = Common::changePassword($request);
-        return $json;
+        return json_decode($json);
     }
     public function increaseUserPoints(Request $request){
         $json = User::increaseUserPoints($request);
-        return $json;
+        return json_decode($json);
     }
     public function updatePersonInformation(Request $request){
         $json = Common::updatePersonInformation($request);
-        return $json;
+        return json_decode($json);
     }
-    
+				
     	/**
 		*
 		*@author 范留山
@@ -82,8 +82,7 @@ class PersonController extends Controller
 			$user_id = $request->input('user_id');
 			$newPssword = $request->input('newPassword');
 			$alterPsd = new Admin();
-			$result = $alterPsd->alterAdministratorsPsd($user_id,$newPssword);
+			$result = $alterPsd->alterAdminPsd($user_id,$newPssword);
 			return $result;
-			}
 		}
 }

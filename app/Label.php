@@ -1,14 +1,15 @@
 <?php
         namespace App;
         use Illuminate\Database\Eloquent\Model;
-        
+        use Illuminate\Support\Facades\DB;
+
     class Label extends Model{
         protected $table='label';  //指定表名
 			
         protected $primaryKey = 'auto_id';  //指定主键
 			
         protected $guarded = ['auto_id'];  //不可批量添加的字段（黑名单）
-			
+
 		/**
      *
      * @auther 张政茂
@@ -73,6 +74,7 @@
         //将获取信息赋值给变量
         $user_id = $request->input('user_id');
         $image_id = $request->input('image_id');
+        $label_id = $request->input('label_id');
 
         //获取user_id最后一位，image_id 后三位
         //substr('字符串'，获取前（后）几位数值)
@@ -82,6 +84,7 @@
 
         $task = DB::table($task_name)
             ->where('user_id',$user_id)
+            ->where('user_assign_label_id',$label_id)
             ->where('image_id',$image_id)
             ->get();
 
@@ -112,6 +115,7 @@
         //将获取信息赋值给变量
         $user_id = $request->input('user_id');
         $image_id = $request->input('image_id');
+        $label_id = $request->input('label_id');
         $label_name = $request->input('label_name');
 
         //将标签内容进行MD5加密
@@ -119,6 +123,8 @@
 
         //更新标签内容
         Label::where('image_id',$image_id)
+            ->where('label_id',$label_id)
+            //->where('user_id',$user_id)
             ->update(['label_name'=>$name_md5]);
 
         //获取user_id最后一位，image_id 后三位
@@ -126,6 +132,7 @@
         $task_name=substr($user_id,-1)."_".substr($image_id,-3)."_task";
 
         DB::table($task_name)
+            ->where('user_assign_label_id',$label_id)
             ->where('user_id',$user_id)
             ->where('image_id',$image_id)
             ->update(['user_assign_label'=>$name_md5]);
@@ -136,39 +143,43 @@
     /**
      * @param $request
      *
-     *
+     *删除标签
      * 根据用户id和图片id
      * 以及打算删除的标签内容从数据库删除记录
      *
      *
      */
-    public static function deleteLabel($request){
+        public static function deleteLabel($request){
 
-        //将获取信息赋值给变量
-        $user_id = $request->input('user_id');
-        $image_id = $request->input('image_id');
-        $label_name = $request->input('label_name');
+            //将获取信息赋值给变量
+            $user_id = $request->input('user_id');
+            $image_id = $request->input('image_id');
+            $label_id = $request->input('label_id');
+            $label_name = $request->input('label_name');
 
-        $label_name_md5 = md5($label_name);
+            $label_name_md5 = md5($label_name);
 
-        //在数据库label表删除标签
-        Label::where('label_name',$label_name_md5)
-            ->where('image_id',$image_id)
-            ->delete();
+            //在数据库label表删除标签
+            Label::where('label_name',$label_name_md5)
+                ->where('image_id',$image_id)
+                ->where('label_id',$label_id)
+                ->delete();
 
 
-        //获取user_id最后一位，image_id 后三位
-        //substr('字符串'，获取前（后）几位数值)
-        $task_name=substr($user_id,-1)."_".substr($image_id,-3)."_task";
+            //获取user_id最后一位，image_id 后三位
+            //substr('字符串'，获取前（后）几位数值)
+            $task_name=substr($user_id,-1)."_".substr($image_id,-3)."_task";
 
-        //在任务表中删除标签
-        DB::table($task_name)
-            ->where('user_id',$user_id)
-            ->where('image_id',$image_id)
-            ->where('user_assign_label',$label_name_md5)
-            ->delete();
+            //在任务表中删除标签
+            $result=DB::table($task_name)
+                ->where('user_id',$user_id)
+                ->where('image_id',$image_id)
+                ->where('user_assign_label_id',$label_id)
+                ->where('user_assign_label',$label_name_md5)
+                ->delete();
+            return ['remind'=>success];
 
-    }
+        }
 	}
 	
 ?>

@@ -7,13 +7,14 @@
  */
 namespace App\Http\Middleware;
 use App\Category;
+
 use Closure;
 use function PHPSTORM_META\type;
 
 /**
  * Class CategoryMiddleware
  * @package App\Http\Middleware
- * @author 葛操
+ * author 葛操
  * 添加图片类型 中间件
  */
 
@@ -24,23 +25,12 @@ class CategoryMiddleware
         $ids = $request->input('ids');
         $names = $request->input('names');
         $locations = $request->input('locations');
-
         $i = 0;
-        $flag =1;
         foreach ($ids as $id) {
-            $tableId = Category::where('category_id',$id)->get();
-            $tableName = Category::where('category_name',$names[$i])->get();
-            $tableLocation = Category::where('category_location',$locations[$i])->get();
-            echo $tableLocation;
-            echo $tableName;
-            echo $tableId;
-            if($tableId)
-            {
-                echo '1231';
-            }
-            echo gettype($tableId);
-
-            if ($tableId&&$tableName&&$tableLocation) {
+            $tableId = Category::where('category_id',$id)->first();
+            $tableName = Category::where('category_name',$names[$i])->first();
+            $tableLocation = Category::where('category_location',$locations[$i])->first();
+            if ($tableId&&$tableName&&$tableLocation||$tableLocation) {
                 echo '第'.($i+1).'条数据重复，请检查！';
                 exit();
            }

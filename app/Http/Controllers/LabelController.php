@@ -39,8 +39,8 @@ class LabelController extends Controller
     //删除标签
     public static function deleteLabel(Request $request)
     {
-        Label::deleteLabel($request);
-
+        $result=Label::deleteLabel($request);
+        return $result;
     }
 
 }

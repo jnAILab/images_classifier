@@ -57,21 +57,21 @@ $api->version('v1', function ($api) {
 	$api->post('/createTask',[
 		'uses' => 'TaskController@createTasks',
 		'middleware' => 'createOneTask',
-		]);
+	]);
 
 	//查看一个任务信息
 	$api->post('/taskInformation',[
 		'uses' => 'TaskController@getTasks',
-		]);
+	]);
 
 	//查看任务列表
 	$api->post('/taskList',[
 		'uses' => 'TaskController@getTaskList',
-		]);
+	]);
 	//更新一个任务信息
 	$api->post('/updateTask',[
 		'uses' => 'TaskController@updateTask',
-		]);
+	]);
 		
 	//删除任务信息（可批量）
 	$api->post('/delectTask',[
@@ -83,13 +83,13 @@ $api->version('v1', function ($api) {
 	*author 聂恒奥
 	*/
 	$api->post('changePassword',[
-		'uses'=>'PersonController@changePassword'
+		'uses'=>'App\Http\Controllers\PersonController@changePassword'
 	]);
 	$api->post('increaseUserPoints',[
-	'uses'=>'PersonController@increaseUserPoints'
+		'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
 	]);
 	$api->post('updatePersonInformation',[
-	'uses'=>'PersonController@updatePersonInformation'
+		'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
 	]);
 
 
@@ -97,16 +97,16 @@ $api->version('v1', function ($api) {
 	*author 葛操
 	*/
 	$api->get('getCategoryList',[
-		'CategoryController@getCategoryList'
+		'uses'=>'App\Http\Controllers\CategoryController@getCategoryList'
 	]);
 	$api->post('storegetCategories',[
-		'CategoryController@storegetCategories'
+		'uses'=>'App\Http\Controllers\CategoryController@storegetCategories'
 	]);
 	$api->post('updateCategoryNames',[
-		'CategoryController@updateCategoryNames'
+		'uses'=>'App\Http\Controllers\CategoryController@updateCategoryNames'
 	]);
 	$api->post('deleteCategories',[
-		'CategoryController@deleteCategories'
+		'uses'=>'App\Http\Controllers\CategoryController@deleteCategories'
 	]);
 
 	/**
@@ -114,36 +114,36 @@ $api->version('v1', function ($api) {
 	*/
 	//添加管理员
 	$api->post('/addAdministrator',[
-	'uses'=>'PersonController@addAdmin',
-	'middleware' => 'addAdmin'
+		'uses'=>'PersonController@addAdmin',
+		'middleware' => 'addAdmin'
 	]);
 	/**
 	*author 田荣鑫
 	*/
 	$api->post('deladmin',[
-		'PersonController@deleteAdministrators'
+		'uses'	'App\Http\Controllers\PersonController@deleteAdministrators'
 	]);
 	$api->get('getadminlist',[
-		'PersonController@getAdministratorList'
+		'uses'	'App\Http\Controllers\PersonController@getAdministratorList'
 	]);
 	$api->post('alteradminpsd',[
-		'PersonController@alterAdminPsd'
+		'uses'	'App\Http\Controllers\PersonController@alterAdminPsd'
 	]);
 
 	/**
 	*author 张正茂
 	*/
 	$api->post('store',[
-		'LabelController@storeLabelContent'
+		'uses'	'App\Http\Controllers\LabelController@storeLabelContent'
 	]);
 	$api->post('get',[
-		'LabelController@getLabelContent'
+		'uses'	'App\Http\Controllers\LabelController@getLabelContent'
 	]);
 	$api->post('update',[
-		'LabelController@updateLabelContent'
+		'uses'	'App\Http\Controllers\LabelController@updateLabelContent'
 	]);
 	$api->post('delete',[
-		'LabelController@deleteLabel'
+		'uses'	'App\Http\Controllers\LabelController@deleteLabel'
 	]);
     
 });

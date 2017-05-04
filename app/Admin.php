@@ -77,10 +77,10 @@
 			//$userDelResult    users表操作影响行数
 			$adminDelResult = DB::table('admins')
 				->where('user_id',$user_id)
-				->update(['is_del',1]);
+				->update(['is_del'=>1]);
 			$userDelResult = DB::table('users')
 				->where('user_id',$user_id)
-				->update(['is_del',1]);
+				->update(['is_del'=>1]);
 			//操作结果判断
 			if($adminDelResult>0  && $userDelResult>0){
 				$resultMsg = '删除成功';
@@ -107,7 +107,7 @@
 		{
 			//修改密码，基于user_id
 			$result = DB::table('users')
-				->where('id',$user_id)
+				->where('user_id',$user_id)
 				->update(['password'=>$newPassword]);
 
 			//判断是否修改成功
