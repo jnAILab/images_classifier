@@ -8,12 +8,11 @@
 
 namespace App\Http\Controllers;
 
-
+use APP\Client;
 use App\Common;
 use App\Admin;
 use App\User;
 use Illuminate\Http\Request;
-
 class PersonController extends Controller
 {
 	/**
@@ -85,4 +84,10 @@ class PersonController extends Controller
 			$result = $alterPsd->alterAdminPsd($user_id,$newPssword);
 			return $result;
 		}
+		public function getPersonInformation(Request $request){
+            $user_id = $request->input('user_id');
+            $client = new Client();
+            $personInformation = $client->getPerInformationToShow($user_id);
+            return Common::returnJsonResponse($personInformation);
+        }
 }

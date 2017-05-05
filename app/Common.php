@@ -2,7 +2,7 @@
 	
 namespace App;
 
-
+use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\Model;
 
 class Common extends Model
@@ -129,5 +129,27 @@ class Common extends Model
             $ResultCode = 0;
         }
         return ['ResultCode'=>$ResultCode,'ResultMsg'=>$ResultMsg,'Data'=>null];
+    }
+
+    /**
+     * @author killer 2017年5月5日17:33:56
+     * 用来返回相应前台的数据，返回的数据经过该函数进行格式化。
+     * 成功相应时$status默认为200
+     * 响应成功的例子：$common->returnJsonResponse(1,'token_generated',array('token' => $token));
+     * 相应错误信息时，填写相应的状态码
+     * 响应失败的例子：$common->returnJsonResponse(0,'could_not_create_token',
+    null,Response::HTTP_INTERNAL_SERVER_ERROR);
+     * @param $resultCode
+     * @param $resultMsg
+     * @param $data
+     * @param int $status default 200
+     * @return JsonResponse
+     */
+    public static function returnJsonResponse($resultCode,$resultMsg,$data,$status = 200){
+        return new JsonResponse([
+            'ResultCode' => $resultCode,
+            'ResultMsg'  => $resultMsg,
+            'Data' => $data
+        ],$status);
     }
 }

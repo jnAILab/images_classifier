@@ -15,16 +15,10 @@ $api = $app->make(Dingo\Api\Routing\Router::class);
 
 
 
-
 $api->version('v1', function ($api) {
     $api->post('/auth/login', [
         'as' => 'api.auth.login',
         'uses' => 'App\Http\Controllers\Auth\AuthController@postLogin',
-    ]);
-
-    $api->get('/test', [
-        'uses' => 'App\Http\Controllers\APIController@test',
-        'as' => 'api.test'
     ]);
 
 
