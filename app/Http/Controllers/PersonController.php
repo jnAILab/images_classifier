@@ -16,19 +16,74 @@ use Illuminate\Http\Request;
 class PersonController extends Controller
 {
 	/**
-		*@author 聂恒奥
-		*/
+     *
+     *@author 聂恒奥
+     *
+     * 修改密码，从前台接收newPassword和user_id
+     *
+     *
+     */
     public function changePassword(Request $request){
-        $json = Common::changePassword($request);
-        return json_decode($json);
+        $Common = new Common();
+        $user_id = $request->input('user_id');
+        $newPassword = $request->input('newPassword');
+        $ResultCode = $Common->changePassword($user_id,$newPassword);
+        if ($ResultCode){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
+    /**
+     *
+     *@author 聂恒奥
+     *
+     * 更加积分，从前台接收user_points和user_ids数组。
+     *
+     *
+     */
     public function increaseUserPoints(Request $request){
-        $json = User::increaseUserPoints($request);
-        return json_decode($json);
+        $user_ids = $request->input('user_ids');
+        $user_points = $request->input('user_points');
+        $user = new User();
+        $ResultCode = $user->increaseUserPoints($user_ids,$user_points);
+        if ($ResultCode){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
+    /**
+     *
+     *@author 聂恒奥
+     *
+     * 修改信息，用户修改个人信息时从前台接收user_id和以对应字段名为名的变量；
+     * 批量修改时从前台接收user_id数组。
+     *
+     *
+     */
     public function updatePersonInformation(Request $request){
-        $json = Common::updatePersonInformation($request);
-        return json_decode($json);
+        $Common = new Common();
+        $all = $request->all();
+
+        $ResultCode = $Common->updatePersonInformation($all);
+        if ($ResultCode){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
 				
     	/**

@@ -42,7 +42,23 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
             'as' => 'api.auth.invalidate'
         ]);
+        /**
+         *author 聂恒奥
+         */
+        //修改信息
+        $api->post('updatePersonInformation',[
+            'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
+        ]);
+        //更加积分
+        $api->post('increaseUserPoints',[
+            'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
+        ]);
+        //修改密码
+        $api->post('changePassword',[
+            'uses'=>'App\Http\Controllers\PersonController@changePassword'
+        ]);
     });
+
     
     /**
 	*author 范留山
@@ -73,18 +89,9 @@ $api->version('v1', function ($api) {
 	]);
 
 
-	/**
-	*author 聂恒奥
-	*/
-	$api->post('changePassword',[
-		'uses'=>'App\Http\Controllers\PersonController@changePassword'
-	]);
-	$api->post('increaseUserPoints',[
-		'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
-	]);
-	$api->post('updatePersonInformation',[
-		'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
-	]);
+
+
+
 
 
 	/**
@@ -107,11 +114,7 @@ $api->version('v1', function ($api) {
 	/**
 	*author 范留山
 	*/
-	//添加管理员
-	$api->post('/addAdministrator',[
-		'uses'=>'App\Http\Controllers\PersonController@addAdmin',
-		'middleware' => 'addAdmin'
-	]);
+
 	/**
 	*author 田荣鑫
 	*/
