@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use App\Common;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
@@ -65,9 +65,11 @@ class AuthController extends Controller
      */
     protected function onBadRequest()
     {
-        return new JsonResponse([
-            'message' => 'invalid_credentials'
-        ], Response::HTTP_BAD_REQUEST);
+        return Common::returnJsonResponse(0,'invalid_credentials',
+            null,Response::HTTP_BAD_REQUEST);
+//        return new JsonResponse([
+//            'message' => 'invalid_credentials'
+//        ], Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -77,9 +79,12 @@ class AuthController extends Controller
      */
     protected function onUnauthorized()
     {
-        return new JsonResponse([
-            'message' => 'invalid_credentials'
-        ], Response::HTTP_UNAUTHORIZED);
+
+        return Common::returnJsonResponse(0,'invalid_credentials',
+            null,Response::HTTP_UNAUTHORIZED);
+//        return new JsonResponse([
+//            'message' => 'invalid_credentials'
+//        ], Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -89,24 +94,23 @@ class AuthController extends Controller
      */
     protected function onJwtGenerationError()
     {
-        return new JsonResponse([
-            'message' => 'could_not_create_token'
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return Common::returnJsonResponse(0,'could_not_create_token',
+            null,Response::HTTP_INTERNAL_SERVER_ERROR);
+        //return new JsonResponse([
+        //'message' =>
+        //], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
      * What response should be returned on authorized.
+     * 返回认证用户的信息
      *
      * @return JsonResponse
      */
     protected function onAuthorized($token)
     {
-        return new JsonResponse([
-            'message' => 'token_generated',
-            'data' => [
-                'token' => $token,
-            ]
-        ]);
+
+        return Common::returnJsonResponse(1,'token_generated',array('token' => $token));
     }
 
     /**
@@ -132,8 +136,8 @@ class AuthController extends Controller
         $token = JWTAuth::parseToken();
 
         $token->invalidate();
-
-        return new JsonResponse(['message' => 'token_invalidated']);
+        return Common::returnJsonResponse(1,'token_invalidated',null);
+        //return new JsonResponse(['message' => 'token_invalidated']);
     }
 
     /**
@@ -146,13 +150,13 @@ class AuthController extends Controller
         $token = JWTAuth::parseToken();
 
         $newToken = $token->refresh();
-
-        return new JsonResponse([
-            'message' => 'token_refreshed',
-            'data' => [
-                'token' => $newToken
-            ]
-        ]);
+        return Common::returnJsonResponse(1,'token_refreshed',array('token' => $newToken));
+//        return new JsonResponse([
+//            'message' => 'token_refreshed',
+//            'data' => [
+//                'token' => $newToken
+//            ]
+//        ]);
     }
 
     /**
@@ -162,9 +166,11 @@ class AuthController extends Controller
      */
     public function getUser()
     {
-        return new JsonResponse([
-            'message' => 'authenticated_user',
-            'data' => JWTAuth::parseToken()->authenticate()
-        ]);
+
+        return Common::returnJsonResponse(1,'authenticated_user',JWTAuth::parseToken()->authenticate());
+//        return new JsonResponse([
+//            'message' => 'authenticated_user',
+//            'data' =>
+//        ]);
     }
 }

@@ -15,16 +15,10 @@ $api = $app->make(Dingo\Api\Routing\Router::class);
 
 
 
-
 $api->version('v1', function ($api) {
     $api->post('/auth/login', [
         'as' => 'api.auth.login',
         'uses' => 'App\Http\Controllers\Auth\AuthController@postLogin',
-    ]);
-
-    $api->get('/test', [
-        'uses' => 'App\Http\Controllers\APIController@test',
-        'as' => 'api.test'
     ]);
 
 
@@ -48,9 +42,16 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
             'as' => 'api.auth.invalidate'
         ]);
-    });
-    
-    /**
+       /**
+	*author 范留山
+	*/
+        //添加管理员
+        $api->post('/addAdministrator',[
+            'uses'=>'App\Http\Controllers\PersonController@addAdmin',
+            'middleware' => 'addAdmin'
+        ]);
+        
+        /**
 	*author 范留山
 	*/
 	//创建一个任务
@@ -78,19 +79,10 @@ $api->version('v1', function ($api) {
 		'uses' => 'App\Http\Controllers\TaskController@delectTask',
 	]);
 
+        
+        
+    });
 
-	/**
-	*author 聂恒奥
-	*/
-	$api->post('changePassword',[
-		'uses'=>'App\Http\Controllers\PersonController@changePassword'
-	]);
-	$api->post('increaseUserPoints',[
-		'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
-	]);
-	$api->post('updatePersonInformation',[
-		'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
-	]);
 
 
 	/**
@@ -110,14 +102,7 @@ $api->version('v1', function ($api) {
 		'uses'=>'App\Http\Controllers\CategoryController@deleteCategories'
 	]);
 
-	/**
-	*author 范留山
-	*/
-	//添加管理员
-	$api->post('/addAdministrator',[
-		'uses'=>'App\Http\Controllers\PersonController@addAdmin',
-		'middleware' => 'addAdmin'
-	]);
+
 	/**
 	*author 田荣鑫
 	*/

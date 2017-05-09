@@ -8,44 +8,110 @@
 
 namespace App\Http\Controllers;
 
-
+use APP\Client;
 use App\Common;
 use App\Admin;
 use App\User;
 use Illuminate\Http\Request;
-
 class PersonController extends Controller
 {
 	/**
-		*@author 聂恒奥
-		*/
+     *
+     *@author 聂恒奥
+     *
+     * 修改密码，从前台接收NewPassword和user_id
+     *
+     *
+     */
     public function changePassword(Request $request){
-        $json = Common::changePassword($request);
-        return json_decode($json);
+        $Common = new Common();
+        $user_id = $request->input('user_id');
+        $NewPassword = $request->input('NewPassword');
+        $ResultCode = $Common->changePassword($user_id,$NewPassword);
+        if ($ResultCode){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
+    /**
+     *
+     *@author 聂恒奥
+     *
+     * 更加积分，从前台接收user_points和user_ids数组。
+     *
+     *
+     */
     public function increaseUserPoints(Request $request){
-        $json = User::increaseUserPoints($request);
-        return json_decode($json);
+        $user_ids = $request->input('user_ids');
+        $user_points = $request->input('user_points');
+        $user = new User();
+        $ResultCode = $user->increaseUserPoints($user_ids,$user_points);
+        if ($ResultCode){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
+    /**
+     *
+     *@author 聂恒奥
+     *
+     * 修改信息，用户修改个人信息时从前台接收user_id和以对应字段名为名的变量；
+     * 批量修改时从前台接收user_id数组。
+     *
+     *
+     */
     public function updatePersonInformation(Request $request){
-        $json = Common::updatePersonInformation($request);
-        return json_decode($json);
+        $Common = new Common();
+        $all = $request->all();
+
+        $ResultCode = $Common->updatePersonInformation($all);
+        if ($ResultCode){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
 				
-    	/**
+    	    	/**
 		*
 		*@author 范留山
-		*添加管理员
+		*添加管理员，
+		*
+		*
+		*@param  sendUsername ：用户名
+		*@param  sendPassword ：密码
+		*@param  sendEmployeeId ：工号
+		*@param  sendEmail ：邮箱
+		*@
+		*@return  [
+			            'ResultCode' => 1,
+			            'ResultMsg'  => 添加管理员成功,
+			            'Data' => null
+			        ],$status
+		*@todo  1.number的更新；2.传参，返回内容的修改
 		*/
 		public function addAdmin(Request $request){
 			$username = $request->input('sendUsername');
 			$password = $request->input('sendPassword');
 			$employeeId = $request->input('sendEmployeeId');
 			$email = $request->input('sendEmail');
-			
 			$addAdmin=new Admin();
-			$result = $addAdmin->addAdministrator($username,$password,$email,$employeeId);
-			return $result;
+			$addAdmin->addAdministrator($username,$password,$email,$employeeId);
+			return Common::returnJsonResponse(1,'添加管理员成功','null');
 		}
 		
 		/**
@@ -85,4 +151,10 @@ class PersonController extends Controller
 			$result = $alterPsd->alterAdminPsd($user_id,$newPssword);
 			return $result;
 		}
+		public function getPersonInformation(Request $request){
+            $user_id = $request->input('user_id');
+            $client = new Client();
+            $personInformation = $client->getPerInformationToShow($user_id);
+            return Common::returnJsonResponse($personInformation);
+        }
 }

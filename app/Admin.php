@@ -1,10 +1,13 @@
 <?php
 	namespace App;
+
+
 	use Illuminate\Database\Eloquent\Model;
+	
 	
 	class Admin extends Model{
 		protected $table = 'admins';  //指定表名
-			
+		
 		protected $primaryKey = 'auto_id';  //指定主键
 		
 		protected $guarded = ['auto_id'];  //不可批量添加的字段（黑名单）
@@ -28,36 +31,25 @@
 		public function addAdministrator($username,$password,$email,$employeeId){
 			
 			//向user表插入信息
-			$result_insert= User::insert([
+			$user_id=uniqid();
+			User::insert([
+				'user_id' => $user_id,
 				'name' => $username,
-				'password' => md5($password),
+				'password' => app('hash')->make($password),
 				'email' => $email,
 				'remember_token' => $username,
 				'status' => 'admin',
 			]);
-			//将users表自增id加密后作为user_id插入users表和admin表
-			$user_id=uniqid();
-			$result_information = User::where('auto_id',$id)->update([
+			
+			User::where('auto_id',$user_id)->update([
 				'user_id'=>$user_id,
 			]);
-			$result_admin = Admin::create([
+			Admin::create([
 				'user_id'=>$user_id,
 				'employee_id'=>$employeeId//插入管理员工号
 			]);
 			
-			//判断信息是否插入成功
-			if ($result_insert&&$result_information&&$result_admin){
-				$resultCode=0;
-				$resultMsg='添加管理员成功';
-			}else{
-				$resultCode=1;
-				$resultMsg='添加管理员失败';
-			}
-			
-			return json_encode([
-				'resultCode'=>$resultCode,
-				'resultMsg' => $resultMsg
-			]);
+			return true;
 		}
 		
 		 /*

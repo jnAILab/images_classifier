@@ -16,4 +16,9 @@ class Client extends Model
     protected $primaryKey = 'user_id';
 
     public $timestamps = false;
+
+    public function getPerInformationToShow($user_id){
+        $result = $this->select('user_id,realname,idcarnumber,address,telephone,user_points,like_image_class,icon_location')->where('user_id','=',$user_id)->get();
+        return $result;
+    }
 }
