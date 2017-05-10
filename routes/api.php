@@ -42,6 +42,18 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
             'as' => 'api.auth.invalidate'
         ]);
+        /**
+         *@author 田荣鑫
+         */
+        $api->post('deladmin',[
+            'uses'=>'App\Http\Controllers\PersonController@deleteAdministrators'
+        ]);
+        $api->get('getadminlist',[
+            'uses'=>'App\Http\Controllers\PersonController@getAdministratorList'
+        ]);
+        $api->post('alteradminpsd',[
+            'uses'=>'App\Http\Controllers\PersonController@alterAdminPsd'
+        ]);
     });
     
     /**
@@ -112,18 +124,7 @@ $api->version('v1', function ($api) {
 		'uses'=>'App\Http\Controllers\PersonController@addAdmin',
 		'middleware' => 'addAdmin'
 	]);
-	/**
-	*author 田荣鑫
-	*/
-	$api->post('deladmin',[
-		'uses'=>'App\Http\Controllers\PersonController@deleteAdministrators'
-	]);
-	$api->get('getadminlist',[
-		'uses'=>'App\Http\Controllers\PersonController@getAdministratorList'
-	]);
-	$api->post('alteradminpsd',[
-		'uses'=>'App\Http\Controllers\PersonController@alterAdminPsd'
-	]);
+
 
 	/**
 	*author 张正茂

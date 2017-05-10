@@ -34,6 +34,8 @@ class User extends Model implements
         'remember_token',
     ];
 
+    protected $primaryKey = 'user_id';
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

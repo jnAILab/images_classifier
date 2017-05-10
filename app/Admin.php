@@ -1,8 +1,9 @@
 <?php
 	namespace App;
 	use Illuminate\Database\Eloquent\Model;
-	
-	class Admin extends Model{
+    use Illuminate\Support\Facades\DB;
+
+    class Admin extends Model{
 		protected $table = 'admins';  //指定表名
 			
 		protected $primaryKey = 'auto_id';  //指定主键
@@ -47,22 +48,38 @@
 			
 			//判断信息是否插入成功
 			if ($result_insert&&$result_information&&$result_admin){
-				$resultCode=0;
-				$resultMsg='添加管理员成功';
-			}else{
-				$resultCode=1;
-				$resultMsg='添加管理员失败';
-			}
-			
-			return json_encode([
-				'resultCode'=>$resultCode,
-				'resultMsg' => $resultMsg
-			]);
+                $resultCode=0;
+                $resultMsg='添加管理员成功';
+            }else{
+                $resultCode=1;
+                $resultMsg='添加管理员失败';
+            }
+
+            return json_encode([
+                'resultCode'=>$resultCode,
+                'resultMsg' => $resultMsg
+            ]);
 		}
+
+
+
+
+        /**
+        * @auther 田荣鑫
+        * 获取管理员列表，获取的管理员名字 为真实姓名
+        */
+        public function getAdministratorList()
+        {
+            $getAdminList =DB::table('admins')
+                ->where('is_del',0)
+                ->select('realname')
+                ->get();
+            return $getAdminList;
+        }
 		
-		 /*
+		 /**
 		* @author 田荣鑫
-		* 删除管理员（deleteAdministrators,可批量）
+		* 删除管理员（deleteAdministrators）
 		* @param $user_id   前台传值到后台经过md5加密值，用来判断哪位管理员
 		* @return  [
 		* 			    'resultMsg' => '删除成功' 或 '删除失败'
@@ -79,19 +96,10 @@
 			$userDelResult = DB::table('users')
 				->where('user_id',$user_id)
 				->update(['is_del'=>1]);
-			//操作结果判断
-			if($adminDelResult>0  && $userDelResult>0){
-				$resultMsg = '删除成功';
-			}else{
-				$resultMsg = '删除失败';
-			}
-			//结果返回
-			return json_encode([
-				'resultMsg' => $resultMsg
-			]);
+
 		}
 
-		/*
+		/**
 		* @author 田荣鑫
 		* 修改管理员密码  （允许其他管理员修改别人的密码？）
 		* @param $user_id   前台传值到后台经过md5加密值，用来判断哪位管理员。
@@ -107,17 +115,6 @@
 			$result = DB::table('users')
 				->where('user_id',$user_id)
 				->update(['password'=>$newPassword]);
-
-			//判断是否修改成功
-			if($result>0){
-				$resultMsg='修改成功';
-			}else{
-				$resultMsg='修改失败';
-			}
-			//结果返回
-			return json_encode([
-				'resultMsg' => $resultMsg
-			]);
 		}
 	}
 ?>
