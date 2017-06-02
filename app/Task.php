@@ -14,17 +14,10 @@
 		*@param  $userId ：md5加密的用户id
 		*@param  $category_id ：图片类型id
 		*@
-		*@return  json数据  {
-		*						'resultCode'=>0,
-		*						'resultMsg'=>‘success’,
-		*						'data'=>{
-		*							'image_id' => 图片id,
-		*							'image_location'=>图片的地址,
-		*						}
-		*					};
+		*@return true;
 		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
 		*/
-		public static function createTaskMarkImage($userId,$category_id){
+		public function createTaskMarkImage($userId,$category_id){
 			//获取图片id
 			$images_id = Image::select('image_id')
 				->where('category_id',$category_id)
@@ -54,14 +47,7 @@
 			$image = Image::select('*')
 				->where('image_id',$get_image_id['image_id'])
 				->first();
-			return json_encode([
-					'resultCode'=>0,
-					'resultMsg'=>'success',
-					'data'=>[
-							'image_id'=>$get_image_id['image_id'],
-							'image_location'=>$image['image_location'],
-						]
-					]);
+			return true;
 		}
 		
 		/**
@@ -71,20 +57,10 @@
 		*
 		*@param  $userId  前台发送的用户id
 		*
-		*@return  [
-		*			"tasks" =>  [
-		*							{
-		*								'plate_information' => '任务列表'（板块信息，这个版块为任务列表）,
-		*								'data' => [
-		*									number=>点赞、踩的人数，
-		*									label_name=>标签内容
-		*								],
-		*							},
-		*						],
-		*			];
+		*@return  $label_informations;
 		*@todo 传参，返回内容的修改
 		*/
-		public static function getTaskList($userId){
+		public function getTaskList($userId){
 			
 			//获取此数据库所有表名
 			$tables=DB::select("select table_name from information_schema.tables where table_schema='images_classifier'");
@@ -162,10 +138,7 @@
 //				$number_informations+=1;
 //			}
 			
-			return json_encode([
-					'plate_information' => '任务列表',
-					'data' => $label_informations,
-				]);
+			return $label_informations;
 		}
 		
 		
@@ -177,15 +150,14 @@
 		*@param  $userId ：md5加密的用户id
 		*@param  $imageId ：所查看任务的图片id
 		*@
-		*@return  json数据  {
-		*						'image_lable'=>此图片标签的信息,
-		*						'category'=>此图片的类别,
-		*						'image_location'=>图片地址,
-		*						'is_end' => 任务是否进行,
-		*					}
+		*@return  array(
+					'image_lable'=>$information->user_assign_label,
+					'category'=>$category['category_name'],
+					'label_information' => json_encode($label_informations),
+					);
 		*@todo  传参，返回内容的修改
 		*/
-		public static function getTasksInformation($userId,$imageId){
+		public function getTasksInformation($userId,$imageId){
 			
 			//先进行表的选择
 			$table=substr($userId,-1)."_".substr($imageId,-3)."_task";
@@ -211,11 +183,11 @@
 				->where('image_id',$imageId)
 				->get();
 			
-			return json_encode([
+			return array(
 					'image_lable'=>$information->user_assign_label,
 					'category'=>$category['category_name'],
-					'label_information' => $label_informations,
-					]);
+					'label_information' => json_encode($label_informations),
+					);
 		}
 		
 		/**
@@ -229,22 +201,20 @@
 		*@param  $labelExistId ：已存在的标签的id
 		*@param  $attitude ：对已有标签的看法（1顶，-2踩）
 		*@
-		*@return  json数据  {
-		*					'result' => 'success',
-		*					'user_assign_label'=>json  {标签one:1,标签two:-2},
-		*					'user_assign_label_id'=>json  {标签one的id:1,标签two的id:-2}
-		*					}
-		*@todo  1.number的更新；2.传参，返回内容的修改
+		*@return  true
+		*@todo  传参，返回内容的修改
 		*/
 		
-		public static function updateTask($userId,$imageId,$labelByHand,$labelExistId,$attitude){
+		public function updateTask($userId,$imageId,$labelByHand,$labelExistId,$attitude){
 			//查询此标签是否存在，如果存在返回信息，不存在插入数据并返回信息
-			$label_information_hand=Label::firstOrCreate([
-				'label_id'=>md5($labelByHand),
-				'label_name'=>$labelByHand,
-				'image_id'=>$imageId
-				]);
-			
+			if ($labelByHand!=null){
+				$label_information_hand=Label::firstOrCreate(['label_id'=>md5($labelByHand)],
+					[
+					'label_name'=>$labelByHand,
+					'image_id'=>$imageId,
+					'number' => 1
+					]);
+			}
 			//查找图片标签名字
 			$label_exist_name=Label::select('label_name')
 				->whereRaw('image_id = ? and label_id =?',[$imageId,$labelExistId] )
@@ -266,6 +236,8 @@
 				$user_assign_label_id[$label_information_hand->label_id]=1;
 			}
 			if($labelExistId!=null){//如果存在踩或者顶的标签id
+				$result=Label::where('label_id',$labelExistId)
+							->increment('number',$attitude);
 				$user_assign_label[$label_exist_name->label_name]=$attitude;
 				$user_assign_label_id[$labelExistId]=$attitude;
 			}
@@ -278,11 +250,7 @@
 					'user_assign_label_id' => json_encode($user_assign_label_id)
 				]);
 				
-			return json_encode([
-				'result'=>'更新任务信息成功',
-				'user_assign_label'=>$user_assign_label,
-				'user_assign_label_id'=>$user_assign_label_id
-				]);
+			return true;
 		}
 		
 		
@@ -294,13 +262,10 @@
 		*@param  $userId ：md5加密的用户id
 		*@param  $imageIds ：所删除任务的图片id数组，如：['xxxxxx','yyyyyy']
 		*@
-		*@return  json数据  {
-		*					'result' => 'success',
-		*					'delect_number' => 删除的数目
-		*					}
+		*@return  array('delect_number' => $delect_number);
 		*@todo  传参，返回内容的修改
 		*/
-		public static function delectTask($userId,$imageIds){
+		public function delectTask($userId,$imageIds){
 			
 			$delect_number = 0;
 			foreach($imageIds as $imageId){
@@ -313,10 +278,7 @@
 					->delete();
 				$delect_number+=$delect_result;
 			}
-			return json_encode([
-				'result'=>'success',
-				'delect_number' => $delect_number
-				]);
+			return	array('delect_number' => $delect_number);
 		}
 	}
 ?>

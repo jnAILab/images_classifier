@@ -42,9 +42,16 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
             'as' => 'api.auth.invalidate'
         ]);
-    });
-    
-    /**
+       /**
+	*author 范留山
+	*/
+        //添加管理员
+        $api->post('/addAdministrator',[
+            'uses'=>'App\Http\Controllers\PersonController@addAdmin',
+            'middleware' => 'addAdmin'
+        ]);
+        
+        /**
 	*author 范留山
 	*/
 	//创建一个任务
@@ -71,62 +78,9 @@ $api->version('v1', function ($api) {
 	$api->post('/delectTask',[
 		'uses' => 'App\Http\Controllers\TaskController@delectTask',
 	]);
-
-
-	/**
-	*author 聂恒奥
-	*/
-	$api->post('changePassword',[
-		'uses'=>'App\Http\Controllers\PersonController@changePassword'
-	]);
-	$api->post('increaseUserPoints',[
-		'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
-	]);
-	$api->post('updatePersonInformation',[
-		'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
-	]);
-
-
-	/**
-	*author 葛操
-	*/
-	$api->get('getCategoryList',[
-		'uses'=>'App\Http\Controllers\CategoryController@getCategoryList'
-	]);
-	$api->post('storegetCategories',[
-		'uses'=>'App\Http\Controllers\CategoryController@storegetCategories',
-		'middleware'=>'storeCategory'
-	]);
-	$api->post('updateCategoryNames',[
-		'uses'=>'App\Http\Controllers\CategoryController@updateCategoryNames'
-	]);
-	$api->post('deleteCategories',[
-		'uses'=>'App\Http\Controllers\CategoryController@deleteCategories'
-	]);
-
-	/**
-	*author 范留山
-	*/
-	//添加管理员
-	$api->post('/addAdministrator',[
-		'uses'=>'App\Http\Controllers\PersonController@addAdmin',
-		'middleware' => 'addAdmin'
-	]);
-	/**
-	*author 田荣鑫
-	*/
-	$api->post('deladmin',[
-		'uses'=>'App\Http\Controllers\PersonController@deleteAdministrators'
-	]);
-	$api->get('getadminlist',[
-		'uses'=>'App\Http\Controllers\PersonController@getAdministratorList'
-	]);
-	$api->post('alteradminpsd',[
-		'uses'=>'App\Http\Controllers\PersonController@alterAdminPsd'
-	]);
-
-	/**
-	*author 张正茂
+	
+		/**
+	*author 张政茂
 	*/
 	$api->post('store',[
 		'uses'=>'App\Http\Controllers\LabelController@storeLabelContent'
@@ -140,5 +94,56 @@ $api->version('v1', function ($api) {
 	$api->post('delete',[
 		'uses'=>'App\Http\Controllers\LabelController@deleteLabel'
 	]);
-    
+
+        /**
+         *author 聂恒奥
+         */
+        //修改信息
+        $api->post('updatePersonInformation',[
+            'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
+        ]);
+        //更加积分
+        $api->post('increaseUserPoints',[
+            'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
+        ]);
+        //修改密码
+        $api->post('changePassword',[
+            'uses'=>'App\Http\Controllers\PersonController@changePassword'
+        ]);
+        
+        	/**
+	*author 葛操
+	*/
+	$api->get('getCategoryList',[
+		'uses'=>'App\Http\Controllers\CategoryController@getCategoryList'
+	]);
+	$api->post('storegetCategories',[
+		'uses'=>'App\Http\Controllers\CategoryController@storegetCategories',
+		'middleware'=>'storeCategory'
+	]);
+	$api->post('updateCategoryNames',[
+		'uses'=>'App\Http\Controllers\CategoryController@updateCategoryNames',
+       	 'middleware'=>'updateCategory'
+	]);
+	$api->post('deleteCategories',[
+		'uses'=>'App\Http\Controllers\CategoryController@deleteCategories'
+	]);
+
+
+        /**
+         *@author 田荣鑫
+         */
+        $api->post('deladmin',[
+            'uses'=>'App\Http\Controllers\PersonController@deleteAdministrators'
+        ]);
+        $api->get('getadminlist',[
+            'uses'=>'App\Http\Controllers\PersonController@getAdministratorList'
+        ]);
+        $api->post('alteradminpsd',[
+            'uses'=>'App\Http\Controllers\PersonController@alterAdminPsd'
+        ]);
+        
+    });
+
+
 });

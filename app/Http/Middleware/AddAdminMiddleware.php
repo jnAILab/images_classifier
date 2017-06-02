@@ -54,7 +54,7 @@ class AddAdminMiddleware
 		$name_result = User::select('name')
 			->where('name',$username)
 			->first();
-		$email_result = Users::select('email')
+		$email_result = User::select('email')
 			->where('email',$email)
 			->first();
 		//输入判断

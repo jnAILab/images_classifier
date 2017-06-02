@@ -2,6 +2,7 @@
 	namespace App\Http\Controllers;
 	
 	use App\Task;
+	use App\Common;
 	use App\updateTaskMarkImage_model;
 	use Illuminate\Http\Request;
 	
@@ -25,14 +26,15 @@
 		public function getTasks(Request $request){
 			$userId=$request->input('sendUserId');
 			$imageId=$request->input('sendImageId');
-			$result = Task::getTasksInformation($userId,$imageId);
-			return $result;
+			$task = new Task();
+			$data = $task -> getTasksInformation($userId,$imageId);
+			return Common::returnJsonResponse(1,'成功返回任务信息',$data);
 		}
 		
             /**
 		*
 		*@author 范留山
-		*获得用户任务列表
+		*查看用户任务列表
 		*
 		*@param  sendUserId  前台发送的用户id
 		*
@@ -51,8 +53,9 @@
 		*/
 		public function getTaskList(Request $request){
 			$userId=$request->input('sendUserId');
-			$result = Task::getTaskList($userId);
-			return $result;
+			$task = new Task();
+			$data = $task -> getTaskList($userId);
+			return Common::returnJsonResponse(1,'成功返回任务列表',$data);
 		}
 		
 		
@@ -77,10 +80,10 @@
 		public function createTasks(Request $request){
 			$userId=$request->input('sendUserId');
 			$imagesId=$request->input('sendCategoryId');
-			$result = Task::createTaskMarkImage($userId,$imagesId);
-			return $result;
+			$task = new Task();
+			$data = $task -> createTaskMarkImage($userId,$imagesId);
+			return Common::returnJsonResponse(1,'成功创建任务','null');
 		}
-		
 		
         	/**
 		*
@@ -106,10 +109,11 @@
 			$labelByHand = $request->input('sendLabelByHand');
 			$labelExistId = $request->input('sendLabelExistId');
 			$attitude=$request->input('sendAttitude');
-			$result = Task::updateTask($userId,$imageId,$labelByHand,$labelExistId,$attitude);
-			return $result;
+			$task = new Task();
+			$result = $task -> updateTask($userId,$imageId,$labelByHand,$labelExistId,$attitude);
+			return Common::returnJsonResponse(1,'成功更新任务信息','null');
 		}
-		
+
         	/**
 		*
 		*@author 范留山
@@ -127,8 +131,9 @@
 		public function delectTask(Request $request){
 			$userId=$request->input('sendUserId');
 			$imageId=$request->input('sendImageId');
-			$result = Task::delectTask($userId,$imageId);
-			return $result;
+			$task = new Task();
+			$data = $task -> delectTask($userId,$imageId);
+			return Common::returnJsonResponse(1,'成功删除任务',$data);
 		}
 	}
 ?>

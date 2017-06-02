@@ -6,7 +6,17 @@
 		protected $table = 'category';  //指定表名
 		public $timestamps = false;  //关闭自动添加时间
 		protected $guarded = ['auto_id'];  //不可批量添加的字段（黑名单）
-			
+
+
+
+
+    public function getCategoryList()
+    {
+        $categorys = Category::get();
+        //var_dump($categorys);
+        //echo $categorys->auto_id;
+        return $categorys;
+    }
 		/**
      * @param $request
      * @param ids 从前台接收到的名称为ids的数组，数组中的数据对应表中的category_id
@@ -15,13 +25,11 @@
      * @param is_del 从前台接收到的名称为is_del的数组，数组中的数据对应表中的is_del
      * @return 返回更新了几条数据
      */
-    public static function storegetCategories($request)
+    public function storegetCategories($ids,$names,$locations,$is_dels)
     {
-        $ids = $request->input('ids');
-        $names = $request->input('names');
-        $locations = $request->input('locations');
-        $is_dels = $request->input('is_dels');
+
         $i = 0;
+        $flag = 0;
         foreach ($ids as $id) {
             $category = new Category();
             $category->category_id = $id;
@@ -30,49 +38,70 @@
             $category->is_del = $is_dels[$i];
             //$category->save();
             if ($category->save()) {
-                echo '第' . ($i + 1) . '条数据插入成功！';
+                $flag++;
             }
             $i++;
         }
-        return $i+1;
+        if($i == $flag)
+        {
+            $resultCode = 1;
+        }else{
+            $resultCode = 0;
+        }
+        return $resultCode;
     }
 
     /**
      * @param $request
      * @return 返回成功更新了几个名称
      */
-    public static function updateCategoryNames($request)
+    public function updateCategoryNames($ids,$names)
     {
-        $befores = $request->input('befores');
-        $afters = $request->input('afters');
         $i = 0;
-        foreach ($befores as $before)
+        $flag = 0;
+        foreach ($ids as $id)
         {
-            $num = Category::where('category_name','=',$before)->update(
-                ['category_name'=>$afters[$i]]
+            $num = Category::where('category_id','=',$id)->update(
+                ['category_name'=>$names[$i]]
             );
+            if($num>0){
+                $flag++;
+            }
             $i++;
         }
-        return $i+1;
+        if($i == $flag){
+            $resultCode = 1;
+        }else{
+            $resultCode = 0;
+        }
+        return $resultCode;
     }
 
     /**
      * @param $request
      * @return 返回删除了几个名称
      */
-    public static function deleteCategories($request)
+    public function deleteCategories($ids)
     {
-        $deletes = $request->input('deletes');
+
         //var_dump($data['id']);
         $i = 0;
-        foreach ($deletes as $delete)
+        $flag = 0;
+        foreach ($ids as $id)
         {
-            $num = Category::where('category_name','=',$delete)->delete();
+            $num = Category::where('category_id','=',$id)->delete();
             //echo '第'.($i+1).'次删除了'.$num.'行！';
+            if($num>0){
+                $flag++;
+            }
             $i++;
-
         }
-        return $i+1;
+        if($i == $flag){
+            $resultCode = 1;
+        }else{
+            $resultCode = 0;
+        }
+        return $resultCode;
     }
 	}
 ?>

@@ -24,6 +24,8 @@ class User extends Model implements
         'email',
     ];
 
+    protected $primaryKey = 'user_id';  //指定主键
+
     /**
      * The attributes excluded from the model's JSON form.
      *
@@ -58,50 +60,27 @@ class User extends Model implements
      *
      * @author 聂恒奥
      *
-     * 用来更加积分，在原积分基础上增加，可一次更加多个用户的积分，
-     * 前台发送包含要更加积分的用户的name的names数组和，
-     * 包含对应积分的user_points数组。例：
-     * {
-     *      "user_id":["1i0oha0h0k0as","sadx5cxz5s1x2","askd5xzc154xz"]
-     *      'user_points':['10','20','30']
-     * }
+     * 用来更加积分，在原积分基础上增加，可一次更加多个用户的积分。
      *
      *
-     * @param 接收控制器中创建的Request实例。
-     * @return {
-     *              'ResultCode':'1'or'0'
-     *              'ResultMsg':'成功'or'失败'
-     *              'Data'=>{
-     *                          '1i0oha0h0k0as':'10'
-     *                          'sadx5cxz5s1x2':'20'
-     *                      }
+     * @param $user_ids
+     * @param $user_points
+     *
+     * @return $ResultCode
+     *
      *
      *
      */
-    public static function increaseUserPoints($request){
-		
-        $user_ids = $request->input('user_id');
-        $user_points = $request->input('user_points');
+    public function increaseUserPoints($user_ids,$user_points){
+
         $i = 0;         //计数
-        $Result = array();
-        //在循环中遍历所有用户，完成更加积分。
-        foreach ($user_ids as $user_id){
+        foreach ($user_ids as $user_id){    //在循环中遍历所有用户，完成更加积分。
             $user_point = Client::where('user_id', '=', $user_id)->first()["attributes"]['user_points'];
             $user_point = $user_point+intval($user_points[$i]);
             $ResultCode = Client::where('user_id', '=', $user_id)->update(
                 ['user_points' => $user_point,'updated_at'=>date("Y-m-d h:i:s")]);
-            $Result[$user_id] = $user_point;
             $i++;
         }
-        if ($ResultCode){
-            $ResultMsg = '成功';
-            $ResultCode = 1;
-        }
-        else{
-            $ResultMsg = '失败';
-            $user_points = null;
-            $ResultCode = 0;
-        }
-        return ['ResultCode'=>$ResultCode,'ResultMsg'=>$ResultMsg,'Data'=>$Result];
+        return $ResultCode;
     }
 }
