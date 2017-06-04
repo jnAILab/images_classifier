@@ -17,39 +17,26 @@
 		*@return true;
 		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
 		*/
-		public function createTaskMarkImage($userId,$category_id){
-			//获取图片id
-			$images_id = Image::select('image_id')
-				->where('category_id',$category_id)
-				->get();
-			
-			//产生一个指定范围内的随机数，用来随机获取一个查询到的 images_id
-			$max_number=count($images_id)-1;
-			$get_number=rand(0,$max_number);
-			$get_image_id = $images_id[$get_number];
-			
-			//获取user_id最后一位，image_id 后三位
-			$table=substr($userId,-1)."_".substr($get_image_id['image_id'],-3)."_task";//substr('字符串'，获取前（后）几位)
-			//不存在$table表（A_BBB_task类型的表），创建此表
-			DB::select('create table if not exists images_classifier.'.$table.'(
-				auto_id  INT(6) not null AUTO_INCREMENT,
-				primary key (auto_id),
-				user_id varchar(16) not null,
-				image_id varchar(16) not null, 
-				user_assign_label MEDIUMTEXT,
-				user_assign_label_id MEDIUMTEXT
-				)engine innoDB');
-			//$table(A_BBB_task)表中插入任务信息
-			$task_result = DB::table($table)->insert([
-				'user_id' => $userId,
-				'image_id' => $get_image_id['image_id'],
-			]);
-			$image = Image::select('*')
-				->where('image_id',$get_image_id['image_id'])
-				->first();
-			return true;
+		public function createTaskMarkImage($user_id,$image_id){
+            //根据用户名和图片id获取表名
+            $table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
+            //检查一下这个表是否存在，如果不存在就创建出来。
+            Common::checkDatabaseByTableName($table_name);
+
+            //$table(A_BBB_task)表中插入任务信息
+            $task_result = DB::table($table_name)->insert([
+                'task_id'=> uniqid(),
+                'user_id' => $user_id,
+                'image_id' => $image_id
+            ]);
+            if($task_result){
+                //插入数据成功
+                $task = DB::table($table_name)->select('task_id')->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
+                return $task->task_id;
+            }
+            return false;//否则插入数据失败
+
 		}
-		
 		/**
 		*
 		*@author 范留山

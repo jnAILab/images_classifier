@@ -21,8 +21,6 @@ $api->version('v1', function ($api) {
         'uses' => 'App\Http\Controllers\Auth\AuthController@postLogin',
     ]);
 
-
-
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
@@ -78,38 +76,38 @@ $api->version('v1', function ($api) {
 	$api->post('/delectTask',[
 		'uses' => 'App\Http\Controllers\TaskController@delectTask',
 	]);
-	
-		/**
-	*author 张政茂
-	*/
-	$api->post('store',[
-		'uses'=>'App\Http\Controllers\LabelController@storeLabelContent'
-	]);
-	$api->post('get',[
-		'uses'=>'App\Http\Controllers\LabelController@getLabelContent'
-	]);
-	$api->post('update',[
-		'uses'=>'App\Http\Controllers\LabelController@updateLabelContent'
-	]);
-	$api->post('delete',[
-		'uses'=>'App\Http\Controllers\LabelController@deleteLabel'
-	]);
 
         /**
-         *author 聂恒奥
+         *author 张政茂
          */
-        //修改信息
-        $api->post('updatePersonInformation',[
-            'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
+        $api->post('storeLabelContent',[
+            'uses'=>'App\Http\Controllers\LabelController@storeLabelContent'
         ]);
-        //更加积分
-        $api->post('increaseUserPoints',[
-            'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
+        $api->post('getLabelContent',[
+            'uses'=>'App\Http\Controllers\LabelController@getLabelContent'
         ]);
-        //修改密码
-        $api->post('changePassword',[
-            'uses'=>'App\Http\Controllers\PersonController@changePassword'
+        $api->post('updateLabelContent',[
+            'uses'=>'App\Http\Controllers\LabelController@updateLabelContent'
         ]);
+        $api->post('deleteLabel',[
+            'uses'=>'App\Http\Controllers\LabelController@deleteLabel'
+        ]);
+
+    /**
+     *author 聂恒奥
+     */
+    //修改信息
+    $api->post('updatePersonInformation',[
+        'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
+    ]);
+    //更加积分
+    $api->post('increaseUserPoints',[
+        'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
+    ]);
+    //修改密码
+    $api->post('changePassword',[
+        'uses'=>'App\Http\Controllers\PersonController@changePassword'
+    ]);
         
         	/**
 	*author 葛操
@@ -142,7 +140,12 @@ $api->version('v1', function ($api) {
         $api->post('alteradminpsd',[
             'uses'=>'App\Http\Controllers\PersonController@alterAdminPsd'
         ]);
-        
+        /**
+         *@author killer
+         */
+        $api->get('pushImage',[
+            'uses'=>'App\Http\Controllers\ImageController@pushImageToUser',
+        ]);
     });
 
 

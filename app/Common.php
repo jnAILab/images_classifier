@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\DB;
 class Common extends Model
 {
       /**
@@ -116,5 +116,55 @@ class Common extends Model
             'ResultMsg'  => $resultMsg,
             'Data' => $data
         ],$status);
+    }
+    /**
+     * @author killer 2017年6月4日00:53:19
+     * 根据用户的id返回用户任务所在的任务表名称列表
+     * @param user_id
+     * @return table_name
+     */
+    public static function generateDatabaseNamesByClientId($user_id){
+        $tablesName = array();
+        $tableTopName = substr($user_id,-1);//获取用户id的最后一个字符
+        //$tableResult = DB::select("SHOW TABLES LIKE '$tableTailName%'");
+        $tableResult = DB::select("select table_name from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'images_classifier' and TABLE_NAME LIKE'$tableTopName%'");
+        foreach($tableResult as $table){
+            $tablesName[] = $table->table_name;
+        }
+        return $tablesName;
+    }
+    /**
+     * @author killer 2017年6月4日02:07:22
+     * 根据用户的id和图片id返回用户任务所在的任务表名称列表
+     * @param user_id
+     * @return table_name
+     */
+    public static function generateDatabaseNamesByClientIdAndImageId($user_id,$image_id){
+        $tableTopName = substr($user_id,-1);//获取用户id的最后一个字符
+        //return $image_id;
+        $tableTailName  = substr($image_id,-3,3);//获取图片id的前三个字符
+        $tableName = $tableTopName."_".$tableTailName."_task";
+        return $tableName;
+    }
+
+    /**@author killer 2017年6月4日 03:15:11
+     * 检查当前数据库里面是否存在某个任务表，如果不存在则创建
+     * @param $table_name
+     */
+    public static function checkDatabaseByTableName($table_name){
+        $tableResult = DB::select("select table_name from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'images_classifier' and TABLE_NAME = '$table_name'");
+        if(count($tableResult)==0){
+           //不存在该表，创建该表。
+            DB::select('create table if not exists images_classifier.'.$table_name.'(
+				auto_id  INT(6) not null AUTO_INCREMENT,
+				primary key (auto_id),
+				task_id varchar(16) not null,
+				user_id varchar(16) not null,
+				image_id varchar(32) not null, 
+				user_assign_label MEDIUMTEXT,
+				user_assign_label_id MEDIUMTEXT
+				)engine innoDB');
+            //sleep(1);//等待表建立成功
+        }
     }
 }

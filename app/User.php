@@ -24,7 +24,7 @@ class User extends Model implements
         'email',
     ];
 
-    protected $primaryKey = 'user_id';  //指定主键
+    protected $primaryKey = 'auto_id';  //指定主键
 
     /**
      * The attributes excluded from the model's JSON form.
