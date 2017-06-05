@@ -191,54 +191,59 @@
 		*@return  true
 		*@todo  传参，返回内容的修改
 		*/
-		
-		public function updateTask($userId,$imageId,$labelByHand,$labelExistId,$attitude){
-			//查询此标签是否存在，如果存在返回信息，不存在插入数据并返回信息
-			if ($labelByHand!=null){
-				$label_information_hand=Label::firstOrCreate(['label_id'=>md5($labelByHand)],
-					[
-					'label_name'=>$labelByHand,
-					'image_id'=>$imageId,
-					'number' => 1
-					]);
-			}
-			//查找图片标签名字
-			$label_exist_name=Label::select('label_name')
-				->whereRaw('image_id = ? and label_id =?',[$imageId,$labelExistId] )
-				->first();
-			
-			//获取user_id最后一位，image_id 后三位
-			$table=substr($userId,-1)."_".substr($imageId,-3)."_task";//substr('字符串'，获取前（后）几位)
-			
-			//取出要更新字段的值（更新后插入）
-			$updates=DB::table($table)
-				->select('user_assign_label','user_assign_label_id')
-				->whereRaw('image_id = ? and user_id =?',[$imageId,$userId] )
-				->first();
-			//处理需更新的数据
-			$user_assign_label=json_decode($updates->user_assign_label,true);
-			$user_assign_label_id=json_decode($updates->user_assign_label_id,true);
-			if($labelByHand!=null){//如果存在手写的标签
-				$user_assign_label[$labelByHand]=1;
-				$user_assign_label_id[$label_information_hand->label_id]=1;
-			}
-			if($labelExistId!=null){//如果存在踩或者顶的标签id
-				$result=Label::where('label_id',$labelExistId)
-							->increment('number',$attitude);
-				$user_assign_label[$label_exist_name->label_name]=$attitude;
-				$user_assign_label_id[$labelExistId]=$attitude;
-			}
-			
-			//更新数据
-			$updata_result = DB::table($table)
-				->whereRaw('user_id =? and image_id = ?',[$userId,$imageId])
-				->update([
-					'user_assign_label' => json_encode($user_assign_label),
-					'user_assign_label_id' => json_encode($user_assign_label_id)
-				]);
-				
-			return true;
-		}
+
+        public function updateTask($userId,$imageId,$labelByHand,$labelExistId,$attitude){
+            //查询此标签是否存在，如果存在返回信息，不存在插入数据并返回信息
+            if ($labelByHand!=null){
+                $label_information_hand=Label::firstOrCreate(['label.label_id'=>md5($labelByHand)],
+                    [
+                        'label.label_name'=>$labelByHand,
+                    ]);
+                Image_Label::firstOrCreate(['label_id'=>md5($labelByHand)],
+                    [
+                        'image_id'=>$imageId,
+                        "like_number"=>1
+                    ]);
+            }
+            //查找图片标签名字
+            $label_exist_name=Label::join("image_label","image_label.label_id","label.label_id")
+                ->select('label.label_name')
+                ->whereRaw('image_label.image_id = ? and image_label.label_id =?',[$imageId,$labelExistId] )
+                ->first();
+
+            //获取user_id最后一位，image_id 后三位
+            $table=substr($userId,-1)."_".substr($imageId,-3)."_task";//substr('字符串'，获取前（后）几位)
+
+            //取出要更新字段的值（更新后插入）
+            $updates=DB::table($table)
+                ->select('user_assign_label','user_assign_label_id')
+                ->whereRaw('image_id = ? and user_id =?',[$imageId,$userId] )
+                ->first();
+            //处理需更新的数据
+            $user_assign_label=json_decode($updates->user_assign_label,true);
+            $user_assign_label_id=json_decode($updates->user_assign_label_id,true);
+            if($labelByHand!=null){//如果存在手写的标签
+                $user_assign_label[$labelByHand]=1;
+                $user_assign_label_id[$label_information_hand->label_id]=1;
+            }
+            if($labelExistId!=null){//如果存在踩或者顶的标签id
+
+                $result=Image_Label::where('label_id',$labelExistId)
+                    ->increment('like_number',$attitude);
+                $user_assign_label[$label_exist_name->label_name]+=$attitude;
+                $user_assign_label_id[$labelExistId]+=$attitude;
+            }
+
+            //更新数据
+            $updata_result = DB::table($table)
+                ->whereRaw('user_id =? and image_id = ?',[$userId,$imageId])
+                ->update([
+                    'user_assign_label' => json_encode($user_assign_label),
+                    'user_assign_label_id' => json_encode($user_assign_label_id)
+                ]);
+
+            return true;
+        }
 		
 		
 		/**

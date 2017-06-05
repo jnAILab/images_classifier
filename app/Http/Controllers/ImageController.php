@@ -55,14 +55,45 @@
                 return Common::returnJsonResponse(0,'image\'s set is null','null');
             }
             $task_id = $this->createTasks($user->user_id,$image_id);
+            $image = Image::select('image_location')->where('image_id','=',$image_id)->first();
             //var_dump($task_id);
             if($image_id === false){//用户身份错误
                 return Common::returnJsonResponse(0,'failed to push a image','null');
             }else if($task_id === false){//任务创建失败
                 return Common::returnJsonResponse(0,'failed to create a task','null');
             }else{
-                return Common::returnJsonResponse(1,'push successful',array('image_id'=>$image_id,'task_id'=>$task_id));
+                return Common::returnJsonResponse(1,'push successful',array('image_location'=>$image->image_location,'image_id'=>$image_id,'task_id'=>$task_id));
             }
+        }
+        /**
+         * 显示图片标记信息的函数
+         *
+         * */
+        public function getImageMarkedInformation(Request $request){
+            $imageId=$request -> input("sendImageId");
+            //$user = JWTAuth::parseToken()->authenticate();
+            $imageObj = new Image();
+            $data = $imageObj->getImageMarkedInformation($imageId);
+            return Common::returnJsonResponse(1,'push successful',$data);
+        }
+
+        /**
+         * 获取某个类别里面未被标记的图片列表
+         * */
+        public function getImageUnmarkedList(Request $request){
+            $imageId=$request -> input("sendCategoryId");
+            //$user = JWTAuth::parseToken()->authenticate();
+            $imageObj = new Image();
+            $data = $imageObj->getImageUnmarkedList($imageId);
+            return Common::returnJsonResponse(1,'push successful',$data);
+        }
+
+        public function getImageMarkedList(Request $request){
+            $imageId=$request -> input("sendCategoryId");
+            //$user = JWTAuth::parseToken()->authenticate();
+            $imageObj = new Image();
+            $data = $imageObj->getImageMarkedList($imageId);
+            return Common::returnJsonResponse(1,'push successful',$data);
         }
 	}
 ?>

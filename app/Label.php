@@ -10,7 +10,6 @@ class Label extends Model{
 
     protected $guarded = ['auto_id'];  //不可批量添加的字段
 
-
     /**
      *
      * @auther 张政茂
@@ -23,50 +22,55 @@ class Label extends Model{
      *关联创建任务表,用户id尾数值和图片id后三位作为表名,同时储存标签内容
      *
      */
-    public function storeLabelContent($user_id,$label_id,$label_name,$image_id,$is_del)
+    public function storeLabelContent($user_id,$label_id,$label_name,$image_id,$task_id)
     {
 
         //使用模型的create方法新增数据(将标签内容储存在标签表)
-        Label::create(
-            [
-                'label_id'=>$label_id,
-                'label_name'=>$label_name,
-                'image_id'=>$image_id,
-                'is_del'=>$is_del
-            ]
-        );
-
-        //echo $result;
-        //获取user_id最后一位，image_id 后三位
-        //substr('字符串'，获取前（后）几位数值)
-        $task_name=substr($user_id,-1)."_".substr($image_id,-3)."_task";
-
-        //若不存在此图片任务的表（A_BBB_task类型的表），则创建
-        DB::select('create table if not exists images_classifier.'.$task_name.'(
-				auto_id  INT(6) not null AUTO_INCREMENT,
-				primary key (auto_id),
-				user_id varchar(16) not null,
-				image_id varchar(16) not null,
-				user_assign_label MEDIUMTEXT,
-				user_assign_label_id MEDIUMTEXT
-				)engine innoDB');
-
-        //将标签内容储存在任务表
-        $result  = DB::table($task_name)
-            ->insert(
+        $labelResult = Label::select('auto_id')->where('label_id','=',$label_id)->get();
+        $result = $labelResult->toArray();
+        if(count($result) == 0){//如果当前的便签不存在则添加新的标签到数据库
+            Label::create(
                 [
-                    'user_assign_label'=>$label_name,
-                    'user_assign_label_id'=>$label_id,
-                    'user_id'=>$user_id,
-                    'image_id'=>$image_id
+                    'label_id'=>$label_id,
+                    'label_name'=>$label_name,
                 ]
             );
-
-        if($result)
-        {
-            return 1;
+        }
+        $task_table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
+        Common::checkDatabaseByTableName($task_table_name);
+        //将标签内容储存在任务表
+        $result  = DB::table($task_table_name)->where('task_id','=',$task_id)->first();
+        $user_assign_label = $result->user_assign_label;
+        $user_assign_label_id = $result->user_assign_label_id;
+        //return $result;
+        //获取数组数据
+        if(is_null($user_assign_label)&&is_null($user_assign_label_id)){
+            $user_assign_label = array();
+            $user_assign_label_id = array();
         }else{
-            return 0;
+            $user_assign_label = json_decode($user_assign_label,true);
+            $user_assign_label_id = json_decode($user_assign_label_id,true);
+        }
+
+        //更新数据
+        if(!isset($user_assign_label[$label_name])){
+            $user_assign_label[$label_name] = 1;
+        }
+        if(!isset($user_assign_label_id[$label_id])){
+            $user_assign_label_id[$label_id] = 1;
+        }
+
+        DB::table($task_table_name)->where('task_id','=',$task_id)
+            ->update(
+                [
+                    'user_assign_label'=>json_encode($user_assign_label),
+                    'user_assign_label_id'=>json_encode($user_assign_label_id),
+                ]
+            );
+        if($result){
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -234,6 +238,24 @@ class Label extends Model{
         }else{
             return 0;
         }
+    }
+    /**
+     * @author 范留山 2017-6-4
+     * 将图片id 和点赞前三个的标签提取出来，形成excel表格，第一列是image_id,第二列标签，第三列标签id……
+     * @param image_id
+     *
+     */
+    public function imageExecl($imageIds){
+        $data=array();
+        foreach($imageIds as $imageId){
+            $data[$imageId] = Label::join("image_label","image_label.label_id","label.label_id")
+                ->select("label.label_name","label.label_id","image_label.like_number")
+                ->where("image_label.image_id",$imageId)
+                ->orderBy('image_label.like_number', 'DESC')
+                ->take(3)
+                ->get();
+        }
+        return $data;
     }
 }
 

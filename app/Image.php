@@ -46,7 +46,7 @@
        public function getImagesIdByCategory($image_categories){
            $imagesId = array();
            foreach($image_categories as $category){
-               $images = $this->select('image_id')->where('category_id','=',$category)->get();
+               $images = $this->select('image_id')->where('category_id','=',$category)->where('end_time','>',date('Y-m-d H:i:s'))->where('is_del','=','0')->get();
                foreach($images as $image_id){
                    $imagesId[] = $image_id->image_id;
                }
@@ -72,5 +72,57 @@
            }
             return $imagesId;
        }
+        /**
+         * 显示图片标记信息的函数
+         * @param $id
+         *
+         * @return $info
+         * */
+        public function getImageMarkedInformation($id){
+            $info = DB::table('image_label')
+                ->leftJoin('label', 'image_label.label_id', '=', 'label.label_id')
+                ->select('image_label.image_id', 'label.label_name',"image_label.label_id","image_label.like_number")
+                ->where('image_id',$id)
+                ->get();
+            return $info;
+        }
+        /**
+         * 获取某个类别里面未被标记的图片列表
+         * @param $category
+         *
+         * @return $info
+         * */
+        public function getImageUnmarkedList($category){
+            if(empty($category)){
+                $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
+                    ->where('label_id',null)
+                    ->get();
+            }else{
+                $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
+                    ->where('category_id',$category)
+                    ->where('label_id',null)
+                    ->get();
+            }
+            return $info;
+        }
+        /**
+         * 获取某个类别里面已被标记的图片列表
+         * @param $category
+         *
+         * @return $info
+         * */
+        public function getImageMarkedList($category){
+            if(empty($category)){
+                $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
+                    ->where('label_id','!=',null)
+                    ->get();
+            }else{
+                $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
+                    ->where('category_id',$category)
+                    ->where('label_id','!=',null)
+                    ->get();
+            }
+            return $info;
+        }
 	}
 ?>
