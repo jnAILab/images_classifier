@@ -112,7 +112,7 @@ $api->version('v1', function ($api) {
         	/**
 	*author 葛操
 	*/
-	$api->get('getCategoryList',[
+	$api->post('getCategoryList',[
 		'uses'=>'App\Http\Controllers\CategoryController@getCategoryList'
 	]);
 	$api->post('storegetCategories',[
@@ -120,8 +120,7 @@ $api->version('v1', function ($api) {
 		'middleware'=>'storeCategory'
 	]);
 	$api->post('updateCategoryNames',[
-		'uses'=>'App\Http\Controllers\CategoryController@updateCategoryNames',
-       	 'middleware'=>'updateCategory'
+		'uses'=>'App\Http\Controllers\CategoryController@updateCategoryNames'
 	]);
 	$api->post('deleteCategories',[
 		'uses'=>'App\Http\Controllers\CategoryController@deleteCategories'
@@ -155,23 +154,27 @@ $api->version('v1', function ($api) {
         $api->post('oppositeLabelWithImage',[
             'uses'=>'App\Http\Controllers\LabelController@oppositeLabelWithImage',
         ]);
+
+        /*范留山s*/
+        //将图片id 和点赞前三个的标签提取出来，形成excel表格，第一列是image_id,第二列标签，第三列标签id……
+        $api->get('/imageExecl', [
+            'uses' => 'App\Http\Controllers\LabelController@imageExecl'
+        ]);
+        //显示图片标记信息的函数
+        $api->post('/getImageMarkedInformation',[
+            "uses"=>'App\Http\Controllers\ImageController@getImageMarkedInformation'
+        ]);
+        //获取某个类别里面未被标记的图片列表
+        $api->post('/getImageUnmarkedList',[
+            "uses"=>'App\Http\Controllers\ImageController@getImageUnmarkedList'
+        ]);
+        //获取某个类别里面未被标记的图片列表
+        $api->post('/getImageMarkedList',[
+            "uses"=>'App\Http\Controllers\ImageController@getImageMarkedList'
+        ]);
+
     });
-    //将图片id 和点赞前三个的标签提取出来，形成excel表格，第一列是image_id,第二列标签，第三列标签id……
-    $api->get('/imageExecl', [
-        'uses' => 'App\Http\Controllers\LabelController@imageExecl'
-    ]);
-    //显示图片标记信息的函数
-    $api->post('/getImageMarkedInformation',[
-        "uses"=>'App\Http\Controllers\ImageController@getImageMarkedInformation'
-    ]);
-    //获取某个类别里面未被标记的图片列表
-    $api->post('/getImageUnmarkedList',[
-        "uses"=>'App\Http\Controllers\ImageController@getImageUnmarkedList'
-    ]);
-    //获取某个类别里面未被标记的图片列表
-    $api->post('/getImageMarkedList',[
-        "uses"=>'App\Http\Controllers\ImageController@getImageMarkedList'
-    ]);
+
 
 
 });

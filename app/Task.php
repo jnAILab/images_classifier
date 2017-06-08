@@ -1,9 +1,9 @@
 <?php
 	namespace App;
-	
+
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Support\Facades\DB;
-	
+
 	class Task extends Model {
 		
 		/**
@@ -51,9 +51,10 @@
 			
 			//获取此数据库所有表名
 			$tables=DB::select("select table_name from information_schema.tables where table_schema='images_classifier'");
-			
+
 			//$tables 为 stdClass Object 对其处理取值
 			$number_allTables=0;
+			$all_tables=array();
 			foreach ($tables as $table){
 				$all_tables[$number_allTables]=$table->table_name;
 				$number_allTables+=1;
@@ -62,6 +63,7 @@
 			$user_id_last_str=substr($userId,-1);//用户id最后一位字符
 			
 			//处理获得一定存在此用户任务的表；表名处理成数组；
+			$task_tables=array();
 			foreach($all_tables as $judge_table){
 				if(strpos($judge_table,'task') !== false){
 					if(strpos($judge_table,$user_id_last_str)!==false){
@@ -70,62 +72,59 @@
 					}
 				}
 			}
-			
-			//循环查找用户所有任务；储存为数组
-			$number_tasks=0;
+
+			//循环查找用户所有任务；将任务的图片id储存为数组
+
+
+			$all_information = array();
 			foreach($task_tables as $task_table){
 				$tasks = DB::table($task_table)
-					->select('image_id')
+					->select('task_id','image_id','user_assign_label',"user_assign_label_id")
 					->where('user_id',$userId)
 					->get();
+
 				if(count($tasks)>0){
 					foreach($tasks as $task){
-						$all_tasks[$number_tasks]=$task->image_id;
-						$number_tasks+=1;
+						if(json_decode($task->user_assign_label_id,true)!=null){
+
+							$label_ids = array_keys(json_decode($task->user_assign_label_id,true));
+							$label_names = array_keys(json_decode($task->user_assign_label,true));
+
+							$number=0;
+							foreach ($label_ids as $a_label_id) {
+
+								$like = Image_Label::select('like_number')
+									->where('label_id',$a_label_id)
+									->first();
+								$end_time = Image::select('end_time')
+									->where('image_id',$task->image_id)
+									->first();
+								$now_time = date("Y-m-d H:i:s");
+								if($end_time<=$now_time){
+									$state=1;
+								}else{
+									$state=0;
+								}
+
+								$all_information[$task->task_id][$a_label_id]['image_id']=$task->image_id;
+
+								$all_information[$task->task_id][$a_label_id]['label_name']=$label_names[$number];
+
+								$all_information[$task->task_id][$a_label_id]['like_number']=$like->like_number;
+
+								$all_information[$task->task_id][$a_label_id]['state']=$state;
+								$number+=1;
+
+							}
+						}else{
+							return null;
+						}
+
+
 					}
 				}
 			}
-			//查找标签信息（点赞或踩的人数，标签内容）
-			$label_informations = Label::select('number','label_name')
-				->whereIn('image_id',$all_tasks)
-				->get();
-			
-//			//获取图片信息（地址、类型id）
-//			$image_informations = Image::select('image_location','category_id')
-//				->whereIn('image_id',$all_tasks)
-//				->get();
-//			
-//			
-//			//将所有图片类型id（category_id）去除重复后，处理成一个数组
-//			$category_number=0;
-//			foreach($image_informations as $image_information){
-//				if($category_number==0 || in_array($image_information->category_id,$category_ids,false)==false){//括号内第三个参数（ture或false）如果为true 类型一并检查
-//					$category_ids[$category_number]= $image_information->category_id;
-//					$category_number+=1;
-//				}
-//			}
-//		
-//		
-//			//查询类别信息
-//			$category_informations = Category::select('category_id','category_name','category_location')
-//				->whereIn('category_id',$category_ids)
-//				->get();
-//			
-//			// 类别名称 与 图片信息 对应起来	(未完成)
-//			$number_informations=0;
-//			foreach($category_informations as $category_information){
-//				$result_informations[$number_informations]=$category_information;
-//				$number_task=0;
-//				foreach($all_tasks as $task){
-//				//	if($image_informations->category_id == $category_informations->category_id){
-//						$result_informations[$number_informations][$number_task]=$task;
-//						$number_task += 1;
-//				//	}
-//				}
-//				$number_informations+=1;
-//			}
-			
-			return $label_informations;
+			return $all_information;
 		}
 		
 		
@@ -135,7 +134,7 @@
 		*查看任务信息，
 		*
 		*@param  $userId ：md5加密的用户id
-		*@param  $imageId ：所查看任务的图片id
+		*@param  $taskId ：所查看任务的id
 		*@
 		*@return  array(
 					'image_lable'=>$information->user_assign_label,
@@ -144,36 +143,58 @@
 					);
 		*@todo  传参，返回内容的修改
 		*/
-		public function getTasksInformation($userId,$imageId){
-			
+		public function getTasksInformation($userId,$taskId,$imageId){
 			//先进行表的选择
 			$table=substr($userId,-1)."_".substr($imageId,-3)."_task";
-			
+
 			//查找此表中，此用户id和此图片id  对应的user_assign_label
 			$information = DB::table($table)
-				->select('user_assign_label')
-				->whereRaw('image_id = ? and user_id = ?',[$imageId,$userId] )
+				->select('user_assign_label',"user_assign_label_id")
+				->where('task_id',$taskId )
 				->first();
-			
-			//image表中查找相关信息
-			$image_information = Image::select('*')
-				->where('image_id',$imageId)
-				->first();
-			
-			//类别表中查找相关信息
-			$category = Category::select('category_name')
-				->where('category_id',$image_information['category_id'])
-				->first();
-			
+
+            //image表中查找相关信息
+            $image_information = Image::select('category_id','image_location')
+                ->where('image_id',$imageId)
+                ->first();
+            //类别表中查找相关信息
+            $category = Category::select('category_name')
+                ->where('category_id',$image_information['category_id'])
+                ->first();
+            if($information->user_assign_label==null){//如果此任务还没有标签
+                return array(
+                    'image_location'=>$image_information['image_location'],//加入此图片地址
+                    'category'=>$category['category_name'],
+                    'label_information' => null
+                );
+            }else{
+                $all_label_name = array_keys(json_decode($information->user_assign_label,true));
+                $all_label_id=array_keys(json_decode($information->user_assign_label_id,true));
+            }
+			$number=0;
+			$all_labelInformation=array();
+			$labelInformation=array();
+			foreach($all_label_name as $label_name){
+				$labelInformation['label_id']=$all_label_id[$number];
+				$labelInformation['label_name']=$label_name;
+				$labelInformation['like_number']=json_decode($information->user_assign_label,true)[$label_name];
+				$all_labelInformation[]=$labelInformation;
+				$number+=1;
+			}
+
+
+
 			//查找标签信息（点赞或踩的人数，标签内容）
-			$label_informations = Label::select('number','label_name')
+			/*$label_informations = Label::join("image_label","image_label.label_id","label.label_id")
+				->select('image_label.like_number','label.label_name')
 				->where('image_id',$imageId)
-				->get();
-			
+				->get();*/
+
 			return array(
-					'image_lable'=>$information->user_assign_label,
+/*					'image_lable'=>array_keys(json_decode($information->user_assign_label,true)),*/
+                    'image_location'=>$image_information['image_location'],//加入此图片地址
 					'category'=>$category['category_name'],
-					'label_information' => json_encode($label_informations),
+					'label_information' => $all_labelInformation //json_decode($information->user_assign_label_id,true),
 					);
 		}
 		
@@ -257,7 +278,7 @@
 		*@return  array('delect_number' => $delect_number);
 		*@todo  传参，返回内容的修改
 		*/
-		public function delectTask($userId,$imageIds){
+		public function delectTask($userId,$imageIds,$taskIds){
 			
 			$delect_number = 0;
 			foreach($imageIds as $imageId){
@@ -266,7 +287,8 @@
 					
 				//删除一条记录
 				$delect_result = DB::table($table)
-					->whereRaw('user_id = ? and image_id =?',[$userId,$imageId])
+					->whereIn('task_id',$taskIds)
+                    ->where('user_id',$userId)
 					->delete();
 				$delect_number+=$delect_result;
 			}

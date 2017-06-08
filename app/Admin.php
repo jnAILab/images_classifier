@@ -28,27 +28,16 @@
 		*			];
 		*
 		*/
-		public function addAdministrator($username,$password,$email,$employeeId){
+		public function addAdministrator($password,$email){
 			
 			//向user表插入信息
 			$user_id=uniqid();
 			User::insert([
 				'user_id' => $user_id,
-				'name' => $username,
 				'password' => app('hash')->make($password),
 				'email' => $email,
-				'remember_token' => $username,
 				'status' => 'admin',
 			]);
-			
-			User::where('auto_id',$user_id)->update([
-				'user_id'=>$user_id,
-			]);
-			Admin::create([
-				'user_id'=>$user_id,
-				'employee_id'=>$employeeId//插入管理员工号
-			]);
-			
 			return true;
 		}
 		
@@ -59,9 +48,17 @@
         */
         public function getAdministratorList()
         {
-            $getAdminList =DB::table('users')
-                ->whereRaw('is_del = ? and status = ?',[0,'admin'] )
-                ->select('name')
+            $getAdminList =User::join('admins',"users.user_id",'admins.user_id')
+                ->whereRaw('users.is_del = ? and users.status = ?',[0,"admin"] )
+                ->select('users.name',
+					'users.user_id',
+					'admins.realname',
+					'admins.employee_id',
+					'admins.idcarnumber',
+					'admins.address',
+					'admins.telephone',
+					'admins.icon_location'
+				)
                 ->get();
             return $getAdminList;
         }

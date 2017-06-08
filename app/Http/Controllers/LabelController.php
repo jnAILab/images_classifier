@@ -30,8 +30,8 @@ class LabelController extends Controller
      * @param label_id : 标签的id
      *
      * @return{
-     *      "Result": 1,
-     *      "remind": "查询成功",
+     *      "Result": 1/0,
+     *      "remind": "查询成功"/"查询失败",
      *      "Date": "标签内容"
      * }
      */
@@ -65,13 +65,12 @@ class LabelController extends Controller
      * 根据用户id和图片id修改label表和任务表中的标签内容
      *
      * @param user_id : 用户id
-     * @param label_id : 标签的id
      * @param image_id : 图片的id
      * @param label_name : 将要更新的新标签内容
      *
      * @return {
-     *      "Result": 1,
-     *      "remind": 成功更新标签,
+     *      "Result": 1/0,
+     *      "remind": ‘更新成功’/‘更新失败’
      *      "Date": null
      * }
      */
@@ -82,9 +81,13 @@ class LabelController extends Controller
         //将获取信息赋值给变量
         $user_id = JWTAuth::parseToken()->authenticate()->user_id;
         $image_id = $request->input('image_id');
-        $label_name = $request->input('label_name');
+        $label_name = $request->input('label_name_new');
+        $label_id = md5($label_name);
+        $task_id = $request->input('task_id');
+        $label_name_old = $request->input('label_name_old');
+        $label_id_old = md5($label_name_old);
         //将数据传递给label模型
-        $result = $Label->updateLabelContent($user_id,$image_id,$label_name);
+        $result = $Label->updateLabelContent($user_id,$image_id,$label_name,$label_id,$task_id,$label_id_old,$label_name_old);
 
         if($result)
         {
@@ -108,9 +111,9 @@ class LabelController extends Controller
      * @param label_name : 将要删除的标签的内容
      *
      * @return {
-     *      "Result": 1,
-     *      "remind": "删除标签",
-     *      "Date": 1 or 0（1：已被删除;0:未被删除）
+     *      "Result": 1/,
+     *      "remind": "软删除成功"/"软删除失败",
+     *      "Date": null
      * }
      */
     public function deleteLabel(Request $request)
@@ -121,9 +124,9 @@ class LabelController extends Controller
         $user_id = JWTAuth::parseToken()->authenticate()->user_id;
         $image_id = $request->input('image_id');
         $label_name = $request->input('label_name');
+        $label_id = md5($label_name);
 
-
-        $result = $Label->deleteLabel($user_id,$image_id,$label_name);
+        $result = $Label->deleteLabel($image_id,$label_id);
 
         if($result)
         {

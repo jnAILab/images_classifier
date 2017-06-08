@@ -95,11 +95,11 @@
         public function getImageUnmarkedList($category){
             if(empty($category)){
                 $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
-                    ->where('label_id',null)
+                    ->where('image_label.label_id',null)
                     ->get();
             }else{
                 $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
-                    ->where('category_id',$category)
+                    ->where('image.category_id',$category)
                     ->where('label_id',null)
                     ->get();
             }

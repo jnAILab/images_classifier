@@ -38,12 +38,9 @@ class CategoryController extends Controller
     //增加图片类别
     public function storegetCategories(Request $request)
     {
-        $ids = $request->input('ids');
-        $names = $request->input('names');
-        $locations = $request->input('locations');
-        $is_dels = $request->input('is_dels');
+        $names = $request->input('newCategoryName');
         $category = new Category();
-        $resultCode = $category->storegetCategories($ids,$names,$locations,$is_dels);
+        $resultCode = $category->storegetCategories($names);
         if($resultCode == 1){
             $resultMsg = '成功';
         }else{
@@ -56,15 +53,16 @@ class CategoryController extends Controller
     //修改图片类别的名称
     public function updateCategoryNames(Request $request)
     {
-        $ids = $request->input('ids');
-        $names = $request->input('names');
+        $category_ids = $request->input('category_id');
+        $category_names = $request->input('category_names');
         $category = new Category();
-        $resultCode = $category->updateCategoryNames($ids,$names);
-        if($resultCode == 1){
-            $resultMsg = '成功';
+        $resultCode = $category->updateCategoryNames($category_ids,$category_names);
+        if($resultCode){
+            $resultMsg = '修改成功';
         }else{
-            $resultMsg = '失败';
+            $resultMsg = '修改失败';
         }
+
         return Common::returnJsonResponse($resultCode,$resultMsg,$data = null);
     }
 
@@ -72,9 +70,9 @@ class CategoryController extends Controller
     //删除图片类别
     public function deleteCategories(Request $request)
     {
-        $ids = $request->input('ids');
+        $category_id = $request->input('category_id');
         $category = new Category();
-        $resultCode = $category->deleteCategories($ids);
+        $resultCode = $category->deleteCategories($category_id);
         if($resultCode == 1){
             $resultMsg = '成功';
         }else{

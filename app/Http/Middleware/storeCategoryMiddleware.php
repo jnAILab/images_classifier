@@ -23,19 +23,13 @@ class storeCategoryMiddleware
 {
     public function handle($request,Closure $next)
     {
-        $ids = $request->input('ids');
-        $names = $request->input('names');
-        $locations = $request->input('locations');
-        $i = 0;
-        foreach ($ids as $id) {
-            $tableId = Category::where('category_id',$id)->first();
-            $tableName = Category::where('category_name',$names[$i])->first();
-            $tableLocation = Category::where('category_location',$locations[$i])->first();
-            if ($tableId&&$tableName&&$tableLocation||$tableLocation) {
-                //echo '第'.($i+1).'条数据重复，请检查！';
-                return Common::returnJsonResponse($resultCode = 0,$resultMsg = '失败',$data = null);
-           }
-            $i++;
+        $names = $request->input('newCategoryName');
+        foreach ($names as $name) {
+
+            $tableName = Category::where('category_name',$name)->first();
+            if ($tableName) {
+                return Common::returnJsonResponse(0,'数据重复',null);
+            }
         }
         return $next($request);
     }

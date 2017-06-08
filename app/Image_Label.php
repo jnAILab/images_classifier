@@ -35,7 +35,7 @@ class Image_Label extends Model
                 [
                     'image_id'=>$image_id,
                     'label_id'=>$label_id,
-                    'users_added'=>json_endcode(array($user_id))
+                    'users_added'=>json_encode(array($user_id))
                 ]
             );
         }else{

@@ -88,6 +88,9 @@
             return Common::returnJsonResponse(1,'push successful',$data);
         }
 
+        /**
+         * 获取某个类别里面已被标记的图片列表
+         * */
         public function getImageMarkedList(Request $request){
             $imageId=$request -> input("sendCategoryId");
             //$user = JWTAuth::parseToken()->authenticate();

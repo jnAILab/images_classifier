@@ -3,9 +3,10 @@
 	
 	use App\Task;
 	use App\Common;
-	use App\updateTaskMarkImage_model;
 	use Illuminate\Http\Request;
-	
+	use Tymon\JWTAuth\Facades\JWTAuth;
+
+
 	class TaskController extends Controller{
         	/**
 		*
@@ -24,10 +25,11 @@
 		*@todo  传参，返回内容的修改
 		*/
 		public function getTasks(Request $request){
-			$userId=$request->input('sendUserId');
-			$imageId=$request->input('sendImageId');
+			$userId = JWTAuth::parseToken()->authenticate()->user_id;
+			$imageId = $request->input("sendImageId");
+			$taskId=$request->input('sendTaskId');
 			$task = new Task();
-			$data = $task -> getTasksInformation($userId,$imageId);
+			$data = $task -> getTasksInformation($userId,$taskId,$imageId);
 			return Common::returnJsonResponse(1,'成功返回任务信息',$data);
 		}
 		
@@ -52,7 +54,7 @@
 		*@todo 传参，返回内容的修改
 		*/
 		public function getTaskList(Request $request){
-			$userId=$request->input('sendUserId');
+			$userId = JWTAuth::parseToken()->authenticate()->user_id;
 			$task = new Task();
 			$data = $task -> getTaskList($userId);
 			return Common::returnJsonResponse(1,'成功返回任务列表',$data);
@@ -81,7 +83,7 @@
 			$userId=$request->input('sendUserId');
 			$imagesId=$request->input('sendCategoryId');
 			$task = new Task();
-			$data = $task -> createTaskMarkImage($userId,$imagesId);
+			$task -> createTaskMarkImage($userId,$imagesId);
 			return Common::returnJsonResponse(1,'成功创建任务','null');
 		}
 		
@@ -129,10 +131,11 @@
 		*@todo  传参，返回内容的修改
 		*/
 		public function delectTask(Request $request){
-			$userId=$request->input('sendUserId');
+			$userId = JWTAuth::parseToken()->authenticate()->user_id;
 			$imageId=$request->input('sendImageId');
+			$taskId=$request->input('sendTaskId');
 			$task = new Task();
-			$data = $task -> delectTask($userId,$imageId);
+			$data = $task -> delectTask($userId,$imageId,$taskId);
 			return Common::returnJsonResponse(1,'成功删除任务',$data);
 		}
 	}

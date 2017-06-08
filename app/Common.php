@@ -21,11 +21,12 @@ class Common extends Model
        *
        *
        */
-    public function updatePersonInformation($all){
+    public function updatePersonInformation($all,$user_id){
 
         $ResultCode = 0;
-        //if前台传入的user_id是数组，即为管理员更改多个用户的统一信息。
-        if (is_array($all['user_id'])){
+        $all = array_filter($all);
+        //if前台传入了user_id数组，即为管理员更改多个用户的统一信息。
+        if (isset($all['user_id'])==true){
             $all_input = $all;
             unset($all_input['user_id']);
             unset($all_input['token']);
@@ -35,11 +36,10 @@ class Common extends Model
             );
             $ResultCode = 1;
         }
-        //else传入的是user_id是字符串，即为用户更改个人信息。
-        elseif(is_string($all['user_id'])){
+        //else为用户更改个人信息。
+        else{
             //提取数据，判断是管理员还是用户
-            $user_all = User::where('user_id', $all['user_id'])->first()['attributes'];
-            $user_id = $user_all['user_id'];
+            $user_all = User::where('user_id', $user_id)->first()['attributes'];
             $if = $user_all['status'];
             //获取表中全部字段，为下面判断要更新字段所属表做准备。
             if ($if == 'admin'){
@@ -69,9 +69,9 @@ class Common extends Model
                 }
             }
         }
-
         return $ResultCode;
     }
+
 
 
 
@@ -142,7 +142,7 @@ class Common extends Model
     public static function generateDatabaseNamesByClientIdAndImageId($user_id,$image_id){
         $tableTopName = substr($user_id,-1);//获取用户id的最后一个字符
         //return $image_id;
-        $tableTailName  = substr($image_id,-3,3);//获取图片id的前三个字符
+        $tableTailName  = substr($image_id,-3,3);//获取图片id的后三个字符
         $tableName = $tableTopName."_".$tableTailName."_task";
         return $tableName;
     }

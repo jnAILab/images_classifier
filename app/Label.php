@@ -156,30 +156,84 @@ class Label extends Model{
      *
      *
      */
-    public function updateLabelContent($user_id,$image_id,$label_name)
+    public function updateLabelContent($user_id,$image_id,$label_name,$label_id,$task_id,$label_id_old,$label_name_old)
     {
-        //获取user_id最后一位，image_id 后三位
-        //substr('字符串'，获取前（后）几位数值)
-        $task_name=substr($user_id,-1)."_".substr($image_id,-3)."_task";
 
-        //获取图片任务表中某图片的label_id
-        $result0 = DB::table($task_name)
-            ->where('user_id',$user_id)
+        //使用模型的create方法更新数据(将label表的标签内容和id更新)
+        $labelResult = Label::select('auto_id')->where('label_id','=',$label_id_old)->get();
+        $result0 = $labelResult->toArray();
+        if(count($result0)){//更新新的标签到数据库
+            Label::where('label_id',$label_id_old)
+                ->update([
+                    'label_id'=>$label_id,
+                    'label_name'=>$label_name,
+                ]);
+        }
+        //更新image_label表，其中添加更新后的标签
+        DB::table('image_label')
             ->where('image_id',$image_id)
-            ->get();
+            ->where('label_id',$label_id_old)
+            ->update([
+                'label_id'=>$label_id,
+                'like_number'=>1
+            ]);
 
-        //将得到的id赋值给$label_id
-        $label_id = $result0[0]->user_assign_label_id;
+        $task_table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
+        Common::checkDatabaseByTableName($task_table_name);
 
-        DB::table($task_name)
-            ->where('user_id',$user_id)
-            ->where('image_id',$image_id)
-            ->update(['user_assign_label'=>$label_name]);
+        $result1 = DB::table($task_table_name)->where('task_id','=',$task_id)->first();
 
-        //更新label表中的label_name
-        $result = Label::where('image_id',$image_id)
-            ->where('label_id',$label_id)
-            ->update(['label_name'=>$label_name]);
+        $user_assign_label = $result1->user_assign_label;
+        $user_assign_label_id = $result1->user_assign_label_id;
+        //return $result;
+        //获取数组数据
+        if(is_null($user_assign_label)&&is_null($user_assign_label_id)){
+            $user_assign_label = array();
+            $user_assign_label_id = array();
+        }else{
+
+            $all_label_name = json_decode($result1->user_assign_label,true);//取出解码的标签名字典
+            $all_label_id = json_decode($result1->user_assign_label_id,true);//取出所有的解码的标签id字典
+            $all_label_id_keys = array_keys($all_label_id);//取出标签id字典中所有的key
+            $all_label_id_values = array_values($all_label_id);//取出标签id字典中所有的value
+            $all_label_name_keys = array_keys($all_label_name);//取出标签名字典中所有的key
+            $all_label_name_values = array_values($all_label_name);//取出标签名字典中所有的value
+            //遍历 修改标签内容后形成新的数组（目的用array_combine()函数重新构成json）
+            $new_all_label_name_keys=array();
+            $number=0;//用来记录数字
+            $this_number=-1;
+            foreach($all_label_name_keys as $label_name_key){
+                if($label_name_key==$label_name_old){
+                    $new_all_label_name_keys[]=$label_name;
+                    $this_number = $number;//保存要修改的标签在数组中的位置
+                }else{
+                    $new_all_label_name_keys[]=$label_name_key;
+                }
+                $number+=1;
+            }
+            $all_label_name_values[$this_number]=1;//根据保存的数组中的位置，来将此标签的点赞重置为1
+            $user_assign_label = array_combine($new_all_label_name_keys, $all_label_name_values);
+
+            $all_label_id_values[$this_number]=1;//根据保存的数组中的位置，来将此标签的点赞重置为1
+            $all_label_id_keys[$this_number] =$label_id;//根据保存的数组中的位置，修改标签内容
+            $user_assign_label_id = array_combine($all_label_id_keys, $all_label_id_values);
+        }
+
+        //更新数据
+        if(!isset($user_assign_label[$label_name])){
+            $user_assign_label[$label_name] = 1;
+        }
+        if(!isset($user_assign_label[$label_id])){
+            $user_assign_label_id[$label_id] = 1;
+        }
+
+        $result = DB::table($task_table_name)->where('task_id','=',$task_id)
+            ->update(
+                [
+                    'user_assign_label'=>json_encode($user_assign_label),
+                    'user_assign_label_id'=>json_encode($user_assign_label_id),
+                ]
+            );
 
         //若为真则返回1，否则返回零
         if($result)
@@ -201,35 +255,23 @@ class Label extends Model{
      *
      */
 
-    public function deleteLabel($user_id,$image_id,$label_name)
+    public function deleteLabel($image_id,$label_id)
     {
 
-        //获取user_id最后一位，image_id 后三位
-        //substr('字符串'，获取前（后）几位数值)
-        $task_name=substr($user_id,-1)."_".substr($image_id,-3)."_task";
-
-        //获取图片任务表中某图片的label_id
-        $result0 = DB::table($task_name)
-            ->where('user_id',$user_id)
-            ->where('image_id',$image_id)
-            ->get()
-            ->toArray();
-
-        $is_del = 1;
-
-        //将得到的id赋值给$label_id
-        $label_id = $result0[0]->user_assign_label_id;
-
-        DB::table('image_label')
+        //使用模型的create方法更新数据(将label表的标签内容和id更新)
+        $labelResult = Label::select('auto_id')->where('label_id','=',$label_id)->get();
+        $result0 = $labelResult->toArray();
+        if(count($result0)){//更新新的标签到数据库
+            Label::where('label_id',$label_id)
+                ->update([
+                    'is_del'=>1,
+                ]);
+        }
+        //更新image_label表，其中添加更新后的标签
+        $result = DB::table('image_label')
             ->where('image_id',$image_id)
             ->where('label_id',$label_id)
-            ->update(['is_del'=>$is_del]);
-
-        //在数据库label表删除标签
-        $result = Label::where('label_name',$label_name)
-            ->where('image_id',$image_id)
-            ->where('label_id',$label_id)
-            ->update(['is_del'=>$is_del]);
+            ->update(['is_del'=>1]);
 
         //若为真则返回1，否则返回零
         if($result)

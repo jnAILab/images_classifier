@@ -13,6 +13,8 @@ use App\Common;
 use App\Admin;
 use App\User;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 class PersonController extends Controller
 {
 	/**
@@ -25,7 +27,8 @@ class PersonController extends Controller
      */
     public function changePassword(Request $request){
         $Common = new Common();
-        $user_id = $request->input('user_id');
+        $user_id = JWTAuth::parseToken()->authenticate()->user_id;
+//        $user_id = $request->input('user_id');
         $newPassword = $request->input('newPassword');
         $ResultCode = $Common->changePassword($user_id,$newPassword);
         if ($ResultCode){
@@ -47,10 +50,12 @@ class PersonController extends Controller
      *
      */
     public function increaseUserPoints(Request $request){
-        $user_ids = $request->input('user_ids');
+//        $user_ids = $request->input('user_ids');
+//        $user_points = $request->input('user_points');
+        $user_id = JWTAuth::parseToken()->authenticate()->user_id;
         $user_points = $request->input('user_points');
         $user = new User();
-        $ResultCode = $user->increaseUserPoints($user_ids,$user_points);
+        $ResultCode = $user->increaseUserPoints($user_id,$user_points);
         if ($ResultCode){
             $ResultMsg = '成功';
             $ResultCode = 1;
@@ -73,8 +78,8 @@ class PersonController extends Controller
     public function updatePersonInformation(Request $request){
         $Common = new Common();
         $all = $request->all();
-
-        $ResultCode = $Common->updatePersonInformation($all);
+        $user_id = JWTAuth::parseToken()->authenticate()->user_id;
+        $ResultCode = $Common->updatePersonInformation($all,$user_id);
         if ($ResultCode){
             $ResultMsg = '成功';
             $ResultCode = 1;
@@ -85,8 +90,9 @@ class PersonController extends Controller
         }
         return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
-				
-    	    	/**
+
+
+    /**
 		*
 		*@author 范留山
 		*添加管理员，
@@ -105,12 +111,10 @@ class PersonController extends Controller
 		*@todo  1.number的更新；2.传参，返回内容的修改
 		*/
 		public function addAdmin(Request $request){
-			$username = $request->input('sendUsername');
 			$password = $request->input('sendPassword');
-			$employeeId = $request->input('sendEmployeeId');
 			$email = $request->input('sendEmail');
 			$addAdmin=new Admin();
-			$addAdmin->addAdministrator($username,$password,$email,$employeeId);
+			$addAdmin->addAdministrator($password,$email);
 			return Common::returnJsonResponse(1,'添加管理员成功','null');
 		}
 		
@@ -136,7 +140,7 @@ class PersonController extends Controller
 
 		/* *
 		* auther 田荣鑫
-		* 获取管理员列表，获取的管理员名字 为真实姓名
+		* 获取管理员列表
 		*/
 		public function getAdministratorList()
 		{
@@ -159,10 +163,14 @@ class PersonController extends Controller
 		*/
 		public function alterAdminPsd(Request $request)
 		{
-			$user_id = $request->input('user_id');
-			$newPssword = $request->input('newPassword');
+            //$adminState = $request->input('adminState');
+            $user_id = $request->input('user_id');
+            if ($user_id == null) {
+                $user_id = JWTAuth::parseToken()->authenticate()->user_id;
+            }
+			$newPassword = $request->input('newPassword');
 			$alterPsd = new Admin();
-			$result = $alterPsd->alterAdminPsd($user_id,$newPssword);
+			$result = $alterPsd->alterAdminPsd($user_id,app('hash')->make($newPassword));
             if ($result){
                 $resultCode=0;
                 $resultMsg='更改密码成功';

@@ -71,16 +71,21 @@ class User extends Model implements
      *
      *
      */
-    public function increaseUserPoints($user_ids,$user_points){
+    public function increaseUserPoints($user_id,$user_points){
+//        $i = 0;         //计数
+//        foreach ($user_ids as $user_id){    //在循环中遍历所有用户，完成更加积分。
+//            $user_point = Client::where('user_id', '=', $user_id)->first()["attributes"]['user_points'];
+//            $user_point = $user_point+intval($user_points[$i]);
+//            $ResultCode = Client::where('user_id', '=', $user_id)->update(
+//                ['user_points' => $user_point,'updated_at'=>date("Y-m-d h:i:s")]);
+//            $i++;
+//        }
+        $user_point = Client::where('user_id', '=', $user_id)->first()->user_points;
+        $user_point = $user_point+intval($user_points);
+        $ResultCode = Client::where('user_id', '=', $user_id)->update(
+            ['user_points' => $user_point,'updated_at'=>date("Y-m-d h:i:s")]
+        );
 
-        $i = 0;         //计数
-        foreach ($user_ids as $user_id){    //在循环中遍历所有用户，完成更加积分。
-            $user_point = Client::where('user_id', '=', $user_id)->first()["attributes"]['user_points'];
-            $user_point = $user_point+intval($user_points[$i]);
-            $ResultCode = Client::where('user_id', '=', $user_id)->update(
-                ['user_points' => $user_point,'updated_at'=>date("Y-m-d h:i:s")]);
-            $i++;
-        }
         return $ResultCode;
     }
 }
