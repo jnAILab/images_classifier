@@ -40,4 +40,20 @@ class Client extends Model
         $result->like_image_class = $array;
         return $result;
     }
+    public function registerClient($realname,$idcarNumber,$sex,$user_id){
+        $result = $this->where('user_id','=',$user_id)->get();
+        if(count($result)!=0){
+            return false;
+        }else{
+            $this->insert([
+                'user_id'=>$user_id,
+                'realname'=>$realname,
+                'idcarnumber' => $idcarNumber,
+                'sex'=>$sex,
+                'updated_at' => date('Y-m-d H:i:s'),
+                'created_at' =>  date('Y-m-d H:i:s')
+            ]);
+            return true;
+        }
+    }
 }

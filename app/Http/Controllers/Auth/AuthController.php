@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 use App\Common;
+use App\User;
+use App\Client;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +14,30 @@ use Illuminate\Http\Exception\HttpResponseException;
 
 class AuthController extends Controller
 {
+    public function postRegister(Request $request){
+        //这个接口是用来注册用户的，因此身份全部为用户
+        $realname=$request -> input("realname");
+        $idcarNumber=$request -> input("idcarnumber");
+        $sex=$request -> input("sex");
+        $email = $request -> input("email");
+        $userName = $request -> input("name");
+        $password = $request -> input("password");
+        $status = 'client';
+        $userObj = new User();
+        //在user表里面注册信息。
+        $user_id = $userObj->registerUser($userName,$email,$password,$status);
+        if(!$user_id){
+            //邮箱重复了
+            return Common::returnJsonResponse(0,'email repeated',null);
+        }
+        $clientObj = new Client();
+        $result = $clientObj->registerClient($realname,$idcarNumber,$sex,$user_id);
+        if($result){
+            return Common::returnJsonResponse(1,'register successfully',null);
+        }else{
+            return Common::returnJsonResponse(0,'failed to register user',null);
+        }
+    }
     /**
      * Handle a login request to the application.
      *
@@ -38,9 +64,9 @@ class AuthController extends Controller
             // Something went wrong whilst attempting to encode the token
             return $this->onJwtGenerationError();
         }
-
+        $email = $request -> input("email");
         // All good so return the token
-        return $this->onAuthorized($token);
+        return $this->onAuthorized($token,$email);
     }
 
     /**
@@ -107,10 +133,11 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    protected function onAuthorized($token)
+    protected function onAuthorized($token,$email)
     {
-
-        return Common::returnJsonResponse(1,'token_generated',array('token' => $token));
+        $userObj = new User();
+        $user = $userObj->where('email','=',$email)->first();
+        return Common::returnJsonResponse(1,'token_generated',array('token' => $token,'user_id'=>$user->user_id));
     }
 
     /**

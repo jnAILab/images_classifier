@@ -122,4 +122,27 @@ class User extends Model implements
         }
         return $clients;
     }
+    function registerUser($name,$email,$password,$status){
+        $user_id = uniqid();
+        $selectResult = $this->where('email','=',$email)->get();
+        if(count($selectResult)!=0){
+            return false;
+        }
+        try{
+            $this->insert([
+                'user_id'=>$user_id,
+                'name' => $name,
+                'email' =>$email,
+                'password' => app('hash')->make($password),
+                'remember_token' => str_random(10),
+                'status'=>$status,
+                'created_at'=>date('Y-m-d H:i:s'),
+                'updated_at'=>date('Y-m-d H:i:s'),
+                'last_login_ip'=>date('Y-m-d H:i:s')
+            ]);
+        }catch (Exception $e){
+            return false;
+        }
+        return $user_id;
+    }
 }

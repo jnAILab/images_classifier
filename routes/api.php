@@ -20,7 +20,10 @@ $api->version('v1', function ($api) {
         'as' => 'api.auth.login',
         'uses' => 'App\Http\Controllers\Auth\AuthController@postLogin',
     ]);
-
+	$api->post('/auth/register', [
+        'as' => 'api.auth.register',
+        'uses' => 'App\Http\Controllers\Auth\AuthController@postRegister',
+    ]);
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
