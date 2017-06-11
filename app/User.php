@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Auth\Authenticatable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Lumen\Auth\Authorizable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -87,5 +88,38 @@ class User extends Model implements
         );
 
         return $ResultCode;
+    }
+
+    /*
+     * @auth 范留山
+     * 显示用户列表
+     * **/
+    public function showUserList(){
+        $clients = DB::table('clients')
+            ->join('users','users.user_id','clients.user_id')
+            ->select(
+                'users.user_id',
+                'clients.sex',
+                'clients.like_image_class',
+                'clients.created_at',
+                'users.name',
+                'users.email'
+            )->where('users.status','client')
+            ->get()
+       ->toArray();
+
+        //将类别id数组替换为类别名称数组
+        foreach ($clients as $client) {
+
+            $like_image_class=array();
+            foreach (json_decode($client->like_image_class,true) as $labelId) {
+                $like_image_class[]= Category::select('category_name')
+                    ->where('category_id',$labelId)
+                    ->first()
+                ->category_name;
+            }
+            $client->like_image_class = $like_image_class;
+        }
+        return $clients;
     }
 }

@@ -24,6 +24,11 @@ class Common extends Model
     public function updatePersonInformation($all,$user_id){
 
         $ResultCode = 0;
+        if (array_key_exists('like_image_class',$all)){
+            if($all['like_image_class']!=null){
+                $all['like_image_class']=json_encode($all['like_image_class']);
+            }
+        }
         $all = array_filter($all);
         //if前台传入了user_id数组，即为管理员更改多个用户的统一信息。
         if (isset($all['user_id'])==true){
@@ -71,6 +76,45 @@ class Common extends Model
         }
         return $ResultCode;
     }
+    /**
+     *
+     * @author 聂恒奥
+     *
+     * 管理员修改用户信息
+     *
+     * @param $user_id
+     * @param $all
+     *
+     * @return $ResultCode
+     *
+     *
+     */
+    public function adminUpdateInformation($all,$user_id){
+        $ResultCode = 0;
+        if (array_key_exists('like_image_class',$all)){
+            if($all['like_image_class']!=null){
+                $all['like_image_class']=json_encode($all['like_image_class']);
+            }
+        }
+        $all = array_filter($all);
+        $user_all = User::where('user_id', $user_id)->first()['attributes'];
+        $table_all = Client::where('user_id', '=', $user_id)->first()['attributes'];
+        //筛选数据，判断要更新的字段所属的表，并完成更新。
+        foreach ($all as $key=>$value){
+            if (array_key_exists($key,$user_all)){
+                $ResultCode = User::where('user_id', '=', $user_id)->update(
+                    [$key=>$value,'updated_at'=>date("Y-m-d h:i:s")]
+                );
+            }
+            elseif (array_key_exists($key,$table_all)){
+                $ResultCode = Client::where('user_id', '=', $user_id)->update(
+                    [$key=>$value,'updated_at'=>date("Y-m-d h:i:s")]
+                );
+            }
+        }
+        return $ResultCode;
+    }
+
 
 
 

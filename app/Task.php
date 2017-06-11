@@ -74,53 +74,55 @@
 			}
 
 			//循环查找用户所有任务；将任务的图片id储存为数组
-
-
 			$all_information = array();
 			foreach($task_tables as $task_table){
 				$tasks = DB::table($task_table)
-					->select('task_id','image_id','user_assign_label',"user_assign_label_id")
-					->where('user_id',$userId)
+					->join('image','image.image_id',$task_table.'.image_id')
+					->select($task_table.'.task_id',$task_table.'.image_id',$task_table.'.user_assign_label',$task_table.".user_assign_label_id")
+					->where($task_table.'.user_id',$userId)
+					->where('image.is_del','0')
 					->get();
 
 				if(count($tasks)>0){
 					foreach($tasks as $task){
-						if(json_decode($task->user_assign_label_id,true)!=null){
 
-							$label_ids = array_keys(json_decode($task->user_assign_label_id,true));
-							$label_names = array_keys(json_decode($task->user_assign_label,true));
+						//判断任务状态
+						$imageInfomration = Image::select('image_location','end_time')
+							->where('image_id', $task->image_id)
+							->first();
+						$now_time = date("Y-m-d H:i:s");
+						if ($imageInfomration->end_tiem <= $now_time) {
+							$state = 1;
+						} else {
+							$state = 0;
+						}
 
-							$number=0;
+						if(json_decode($task->user_assign_label_id,true)!=null) {
+
+							$label_ids = array_keys(json_decode($task->user_assign_label_id, true));
+							$label_names = array_keys(json_decode($task->user_assign_label, true));
+
+							$number = 0;
 							foreach ($label_ids as $a_label_id) {
 
 								$like = Image_Label::select('like_number')
-									->where('label_id',$a_label_id)
+									->where('label_id', $a_label_id)
 									->first();
-								$end_time = Image::select('end_time')
-									->where('image_id',$task->image_id)
-									->first();
-								$now_time = date("Y-m-d H:i:s");
-								if($end_time<=$now_time){
-									$state=1;
-								}else{
-									$state=0;
-								}
 
-								$all_information[$task->task_id][$a_label_id]['image_id']=$task->image_id;
+								$all_information[$task->task_id][$a_label_id]['image_id'] = $task->image_id;
+								$all_information[$task->task_id][$a_label_id]['image_location'] = $imageInfomration->image_location;
+								$all_information[$task->task_id][$a_label_id]['label_name'] = $label_names[$number];
+								$all_information[$task->task_id][$a_label_id]['like_number'] = $like->like_number;
+								$all_information[$task->task_id][$a_label_id]['state'] = $state;
 
-								$all_information[$task->task_id][$a_label_id]['label_name']=$label_names[$number];
-
-								$all_information[$task->task_id][$a_label_id]['like_number']=$like->like_number;
-
-								$all_information[$task->task_id][$a_label_id]['state']=$state;
-								$number+=1;
+								$number += 1;
 
 							}
 						}else{
-							return null;
+							$all_information[$task->task_id]['image_id']=$task->image_id;
+							$all_information[$task->task_id]['image_location'] = $imageInfomration->image_location;
+							$all_information[$task->task_id]['state']=$state;
 						}
-
-
 					}
 				}
 			}

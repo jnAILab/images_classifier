@@ -8,12 +8,16 @@
 
 namespace App\Http\Controllers;
 
-use APP\Client;
+
+
+use App\Category;
+use App\Client;
 use App\Common;
 use App\Admin;
 use App\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Storage;
 
 class PersonController extends Controller
 {
@@ -80,6 +84,21 @@ class PersonController extends Controller
         $all = $request->all();
         $user_id = JWTAuth::parseToken()->authenticate()->user_id;
         $ResultCode = $Common->updatePersonInformation($all,$user_id);
+        if ($ResultCode){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
+    }
+    public function adminUpdateInformation(Request $request){
+        $Common = new Common();
+        $all = $request->all();
+        $user_id = $request->input('user_id');
+        $ResultCode = $Common->adminUpdateInformation($all,$user_id);
         if ($ResultCode){
             $ResultMsg = '成功';
             $ResultCode = 1;
@@ -180,16 +199,90 @@ class PersonController extends Controller
             }
             return Common::returnJsonResponse($resultCode,$resultMsg,null);
         }
-        
-        
-        
-        
-        
-        
-		public function getPersonInformation(Request $request){
+        /**
+         *@author 聂恒奥
+         * 获取用户个人信息
+         */
+        public function getPersonInformation(Request $request){
             $user_id = $request->input('user_id');
             $client = new Client();
             $personInformation = $client->getPerInformationToShow($user_id);
-            return Common::returnJsonResponse($personInformation);
+            if ($personInformation){
+                $ResultMsg = '成功';
+                $ResultCode = 1;
+            }
+            else{
+                $ResultMsg = '失败';
+                $ResultCode = 0;
+            }
+            return Common::returnJsonResponse($ResultCode,$ResultMsg,$personInformation);
         }
+
+        /*
+         * @auth 范留山
+         * 显示用户列表
+         * **/
+        public function showUserList(Request $request){
+            $user = new User();
+            $information = $user->showUserList();
+            return Common::returnJsonResponse(1,'查找用户列表成功',$information);
+        }
+
+
+
+
+
+    public function getUserTaskLike(Request $request)
+    {
+        $realname = $request->input('realname');
+        $client = new Client();
+        $result = $client->getUserTaskLike($realname);
+        if($result){
+            $reultCode = 1;
+            $resultMsg = '获取成功';
+        }else{
+            $reultCode = 0;
+            $resultMsg = '获取失败';
+        }
+        $category = new Category();
+        $userLike = $result->toArray();
+        $data = $userLike[0]['like_image_class'];
+        $category_ids = json_decode($data,true);
+        //var_dump($category_ids);
+        $category_nameL = [];
+        foreach ($category_ids as $category_id)
+        {
+            $category_names = $category->getCategoryName($category_id)->toArray();
+            $category_name = $category_names[0]['category_name'];
+            $category_nameL[] = $category_name;
+            //var_dump($category_name);
+        }
+       // var_dump($category_nameL);
+        return Common::returnJsonResponse($reultCode,$resultMsg,$category_nameL);
+    }
+
+
+
+
+    public function upload(Request $request)
+    {
+    	$file = $request->file('zip');
+        //$file = $request->file('zip');
+        $filename =  $file->getClientOriginalName();
+        $filenames = explode('.',$filename);
+        $category_name = $filenames[0];
+        $extend = $filenames[1];
+        $zipname = $category_name.'.'.$extend;
+        $file->move('Image/'.$category_name.'/',$zipname);
+        $path = "Image/".$category_name."/";
+        $zipfile = zip_open('Image/'.$category_name.$zipname);
+        $bool = system('unzip '.$path.$zipname.' -d '.$path);
+        system('rm -f '.$path.$filename);
+        if($bool){
+           return Common::returnJsonResponse(1,'上传成功',null);
+        }else{
+           return Common::returnJsonResponse(0,'上传失败',null);
+        }
+    }
+
 }

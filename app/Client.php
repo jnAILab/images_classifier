@@ -10,6 +10,8 @@ namespace App;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+
 
 class Client extends Model
 {
@@ -17,8 +19,25 @@ class Client extends Model
 
     public $timestamps = false;
 
+    public function getUserTaskLike($realname)
+    {
+        $result = $this->select('like_image_class')->where('realname',$realname)->get();
+        return $result;
+    }
+
     public function getPerInformationToShow($user_id){
-        $result = $this->select('user_id,realname,idcarnumber,address,telephone,user_points,like_image_class,icon_location')->where('user_id','=',$user_id)->get();
+
+        $result = DB::table('users')
+            ->join('clients','clients.user_id','users.user_id')
+            ->select('name','realname','sex','idcarnumber','email','like_image_class')
+            ->where('users.user_id',$user_id)
+            ->first();
+        $result->like_image_class = json_decode($result->like_image_class);
+        $array = [];
+        foreach ($result->like_image_class as $id){
+            $array[] = Category::where('category_id',$id)->select('category_name')->first()->category_name;
+        }
+        $result->like_image_class = $array;
         return $result;
     }
 }

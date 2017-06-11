@@ -98,5 +98,116 @@
             $data = $imageObj->getImageMarkedList($imageId);
             return Common::returnJsonResponse(1,'push successful',$data);
         }
+
+
+        /**
+         * @author dain 2017.6.4 15:00
+         * 根据图片id 将图片移动到以当前用户user_id命名的文件夹进行打包
+         * @param $request
+         *
+         * @return   json
+         * {
+        "ResultCode": 'true',
+        "ResultMsg": "zip successful",
+        "Data": {
+        $downUrl
+        }
+         * }
+         * ps：请在linux上安装zip程序
+         * ps：请在linux上安装zip程序
+         * ps：请在linux上安装zip程序
+         */
+
+
+        public function zipImage(Request $request)
+        {
+            $image_ids = $request->input('image_id');
+            $user_id = JWTAuth::parseToken()->authenticate()->user_id;//获取当前用户$user_id,创建下载文件�?
+
+            //$imageLocation = array();
+            $getLocation = new Image();
+            $imageLocation = $getLocation->getImageLocationInImage($image_ids);
+            $newLocation = 'Image/download/' . $user_id;//下载文件夹打包地址
+
+
+            if (!is_dir('Image/download/' . $user_id)) {
+                mkdir("Image/download/" . $user_id);
+            } else {//删除
+                $allImage = glob($newLocation . '/*');
+                foreach ($allImage as $file) {
+                    if (is_file($file)) {
+                        unlink($file);
+                    }
+                    //mkdir("Image/download/" . $user_id);
+                }
+            }
+            foreach ($imageLocation as $location){
+                exec("cp $location $newLocation");
+            }
+
+            if (!is_file($user_id . '.zip')) {
+                //unlink($user_id . 'zip');
+                //进行压缩
+                $outputs = array();
+                /*用php的exec执行Linux命令 括号里的字符串就是你在Linux命令窗口里敲的命令；
+                第二个参数是linux执行该命令后返回的结果数组；
+                linux执行返回的每一条结果依次存入该数组
+                第三个参数是结果，如果执行成功，则Linux返回结果值为0，如果执行失败，则结果值不�?
+                */
+                exec("zip -r $user_id'.zip' $newLocation", $outputs, $rc);//exec调用linux命令
+                if ($rc != 0) {
+                    foreach ($outputs as $ko => $vo) {
+                        echo "$vo<br/>";
+                    }
+                    return Common::returnJsonResponse('false', 'zip unsuccessful', null);
+                } else {
+                    $zipfile = $user_id . '.zip';
+                    return Common::returnJsonResponse('true', 'zip successful', $zipfile);
+                }
+            }else {
+                unlink($user_id . '.zip');
+                //进行压缩
+                $outputs = array();
+                /*用php的exec执行Linux命令 括号里的字符串就是你在Linux命令窗口里敲的命令；
+                第二个参数是linux执行该命令后返回的结果数组；
+                linux执行返回的每一条结果依次存入该数组
+                第三个参数是结果，如果执行成功，则Linux返回结果值为0，如果执行失败，则结果值不�?
+                */
+                exec("zip -r $user_id'.zip' $newLocation", $outputs, $rc);//exec调用linux命令
+                if ($rc != 0) {
+                    foreach ($outputs as $ko => $vo) {
+                        echo "$vo<br/>";
+                    }
+                    return Common::returnJsonResponse('false', 'zip unsuccessful', null);
+                } else {
+                    $zipfile = $user_id . '.zip';//文件下载输出后删除相关文件
+                    return Common::returnJsonResponse('true', 'zip successful', $zipfile);
+                }
+            }
+
+        }
+        /**
+         * @author dain 2017.6.4 15:00
+         * 操作数据库读取image_location
+         * @param $image_ids
+         * @return array
+         */
+        public function getImageLocationInImage($image_ids){
+            $imageLocation = array();
+            //dd($image_ids);
+            foreach ($image_ids as $image_id){
+                $image_locations = DB::table('image')
+                    ->where('image_id', $image_id)
+                    ->select('image_location')
+                    ->get();
+//               dd($image_locations);
+                foreach ($image_locations as $image_location){
+                    $imageLocation[] = $image_location->image_location;
+                }
+            }
+            return $imageLocation;
+
+
+        }
 	}
 ?>

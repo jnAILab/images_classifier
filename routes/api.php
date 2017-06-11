@@ -96,7 +96,11 @@ $api->version('v1', function ($api) {
     /**
      *author 聂恒奥
      */
-    //修改信息
+    //获取用户信息
+    $api->post('getPersonInformation',[
+        'uses'=>'App\Http\Controllers\PersonController@getPersonInformation'
+    ]);
+    //用户修改个人信息
     $api->post('updatePersonInformation',[
         'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
     ]);
@@ -108,10 +112,26 @@ $api->version('v1', function ($api) {
     $api->post('changePassword',[
         'uses'=>'App\Http\Controllers\PersonController@changePassword'
     ]);
-        
+    /*
+     * 范留山
+     * **/
+    $api->post('showUserList',[
+        'uses'=>'App\Http\Controllers\PersonController@showUserList'
+    ]);
+
         	/**
 	*author 葛操
 	*/
+        $api->post('getUserTaskLike',[
+            'uses'=>'App\Http\Controllers\PersonController@getUserTaskLike'
+        ]);
+
+
+        $api->post('upload',[
+            'uses'=>'App\Http\Controllers\PersonController@upload'
+        ]);
+
+
 	$api->post('getCategoryList',[
 		'uses'=>'App\Http\Controllers\CategoryController@getCategoryList'
 	]);
@@ -156,21 +176,33 @@ $api->version('v1', function ($api) {
         ]);
 
         /*范留山s*/
-        //将图片id 和点赞前三个的标签提取出来，形成excel表格，第一列是image_id,第二列标签，第三列标签id……
-        $api->get('/imageExecl', [
+        //查看 图片id，对该图片进行过标注的用户（数组返回用户名），该图片已经有的标签（数组返回标签名）
+        $api->get('seeExport', [
+            'uses' => 'App\Http\Controllers\LabelController@seeExport'
+        ]);
+        //下载 图片id，对该图片进行过标注的用户（数组返回用户名），该图片已经有的标签（数组返回标签名）
+        $api->get('imageExecl', [
             'uses' => 'App\Http\Controllers\LabelController@imageExecl'
         ]);
         //显示图片标记信息的函数
-        $api->post('/getImageMarkedInformation',[
+        $api->post('getImageMarkedInformation',[
             "uses"=>'App\Http\Controllers\ImageController@getImageMarkedInformation'
         ]);
         //获取某个类别里面未被标记的图片列表
-        $api->post('/getImageUnmarkedList',[
+        $api->post('getImageUnmarkedList',[
             "uses"=>'App\Http\Controllers\ImageController@getImageUnmarkedList'
         ]);
         //获取某个类别里面未被标记的图片列表
-        $api->post('/getImageMarkedList',[
+        $api->post('getImageMarkedList',[
             "uses"=>'App\Http\Controllers\ImageController@getImageMarkedList'
+        ]);
+
+        /*
+         * auth 田荣鑫
+         * **/
+        //压缩图片，回传文件名下载
+        $api->post('zipimage',[
+            'uses'=>'App\Http\Controllers\ImageController@zipImage'
         ]);
 
     });

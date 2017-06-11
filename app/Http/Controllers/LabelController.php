@@ -223,47 +223,49 @@ class LabelController extends Controller
         }
         return Common::returnJsonResponse(1,'change like number successfully',$data = null);
     }
+
+    /**
+     * @author 范留山 2017-6-11
+     * 查看 图片id，对该图片进行过标注的用户（数组返回用户名），改图片已经有的标签（数组返回标签名）
+     * @param image_id 图片id 数组
+     */
+    public function seeExport(Request $request){
+        $label = new Label();
+        $results = $label->imageExecl();
+        return Common::returnJsonResponse(1,'查找成功',$results);
+    }
     /**
      * @author 范留山 2017-6-4
-     * 将图片id 和点赞前三个的标签提取出来，形成excel表格，第一列是image_id,第二列标签，第三列标签id……
-     * @param image_id
+     *  下载excel 图片id，对该图片进行过标注的用户（数组返回用户名），改图片已经有的标签（数组返回标签名）
+     * @param image_id :图片id 数组
      */
     public function imageExecl (Request $request)
     {
-        //$imageIds = $request->input("sendImage");
-        $imageIds=['imageId1','imageId2'];
         $label = new Label();
-        $results = $label->imageExecl($imageIds);
-
+        $results = $label->imageExecl();
         set_time_limit ( 0 );
-        $allData = array();
 
-        $i=0;
-        foreach($results as $result) {
-            $data = array();
-            $data[] = $imageIds[$i];
-            foreach ($result as $re) {
-                $data[] = $re["label_name"];
-                $data[] = $re["label_id"];
-            }
-            $i += 1;
-            $allData[] = $data;
+        //处理成二维数组，以便储存为excel   [[图片id1，标签名数组1，用户名数组1],[图片id2，标签名数组2，用户名数组2],……]
+       $allData = array();
+        foreach($results as $imageId=>$result) {
+            $data=array();
+            $data[] = $imageId;
+            $data[] = json_encode($result["label_name_list"],JSON_UNESCAPED_UNICODE);
+            $data[] = json_encode($result["user_id_list"],JSON_UNESCAPED_UNICODE);
+            $allData[]=$data;
         }
 
+        //第一行的名字
         $ht = array (
             '图片id',
-            '标签1',
-            '标签id1',
-            '标签2',
-            '标签id2',
-            '标签3',
-            '标签id3',
+            '标签名',
+            '用户名',
         );
 
         $dataArr [0] = $ht;
-        $dataArr = array_merge ( $dataArr, ( array ) $allData );
-        $this->outExcel ( $dataArr, 'a');//后面的参数改名字
-        return $allData;
+        $dataArr = array_merge ( $dataArr, $allData );
+        $this->outExcel ( $dataArr, 'image_label');//后面的参数改名字
+
     }
     //下载excel文件的方法
     function outExcel($dataArr, $fileName = '', $sheet = false) {

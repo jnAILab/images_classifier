@@ -9,6 +9,11 @@
 
 
 
+    public function getCategoryName($category_id)
+    {
+        $result = $this->select('category_name')->where('category_id',$category_id)->get();
+        return $result;
+    }
 
     public function getCategoryList()
     {

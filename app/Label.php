@@ -287,17 +287,56 @@ class Label extends Model{
      * @param image_id
      *
      */
-    public function imageExecl($imageIds){
+    public function imageExecl(){
+
+        //获取不重复的所有的图片id
+        $images= image_label::select('image_id')
+            ->distinct()
+            ->get();
+
+        //获取信息
         $data=array();
-        foreach($imageIds as $imageId){
-            $data[$imageId] = Label::join("image_label","image_label.label_id","label.label_id")
-                ->select("label.label_name","label.label_id","image_label.like_number")
-                ->where("image_label.image_id",$imageId)
+        foreach ($images as $image) {
+            $data[$image->image_id] = Label::join("image_label","image_label.label_id","label.label_id")
+                ->select("label.label_name","image_label.like_number","image_label.users_added")
+                ->where('image_label.image_id',$image->image_id)
+                ->where('image_label.is_del',0)
                 ->orderBy('image_label.like_number', 'DESC')
                 ->take(3)
                 ->get();
+
         }
-        return $data;
+
+        //将用户名和标签处理成数组
+        $finallyInformation =array();
+        foreach($data as $imageId=>$oneData){
+            $userIdsListOne=array();
+            $labelName=array();
+            foreach($oneData as $information){
+                $labelName[] = $information->label_name;
+                $userIdsListTwo=array();
+                foreach(json_decode($information->users_added,true) as $userIds){
+                    if(count($userIds)>1){
+                        foreach($userIds as $oneUserId){
+                            $userName=User::select('name')
+                                ->where('user_id',$oneUserId)
+                                ->first();
+                            $userIdsListTwo[]=$userName->name;
+                        }
+                    }else{
+                        $userName=User::select('name')
+                            ->where('user_id',$userIds)
+                            ->first();
+                        $userIdsListTwo[]=$userName->name;
+                    }
+                }
+                $userIdsListOne[]=$userIdsListTwo;
+            }
+            $finallyInformation[$imageId]['label_name_list']=$labelName;
+            $finallyInformation[$imageId]['user_id_list']=$userIdsListOne;
+        }
+
+        return $finallyInformation;
     }
 }
 
