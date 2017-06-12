@@ -115,6 +115,12 @@ $api->version('v1', function ($api) {
     $api->post('changePassword',[
         'uses'=>'App\Http\Controllers\PersonController@changePassword'
     ]);
+    //数据统计
+    $api->post('getData',[
+        'uses'=>'App\Http\Controllers\PersonController@getData'
+    ]);
+    
+    
     /*
      * 范留山
      * **/
