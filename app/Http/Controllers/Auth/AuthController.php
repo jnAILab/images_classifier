@@ -137,7 +137,7 @@ class AuthController extends Controller
     {
         $userObj = new User();
         $user = $userObj->where('email','=',$email)->first();
-        return Common::returnJsonResponse(1,'token_generated',array('token' => $token,'user_id'=>$user->user_id));
+        return Common::returnJsonResponse(1,'token_generated',array('token' => $token,'user_id'=>$user->status));
     }
 
     /**

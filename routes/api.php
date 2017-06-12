@@ -180,7 +180,7 @@ $api->version('v1', function ($api) {
 
         /*范留山s*/
         //查看 图片id，对该图片进行过标注的用户（数组返回用户名），该图片已经有的标签（数组返回标签名）
-        $api->get('seeExport', [
+        $api->post('seeExport', [
             'uses' => 'App\Http\Controllers\LabelController@seeExport'
         ]);
         //下载 图片id，对该图片进行过标注的用户（数组返回用户名），该图片已经有的标签（数组返回标签名）
