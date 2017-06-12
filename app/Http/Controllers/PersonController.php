@@ -234,9 +234,10 @@ class PersonController extends Controller
 
     public function getUserTaskLike(Request $request)
     {
-        $realname = $request->input('realname');
+        $user_id = JWTAuth::parseToken()->authenticate()->user_id;
         $client = new Client();
-        $result = $client->getUserTaskLike($realname);
+        $result = $client->getUserTaskLike($user_id);
+
         if($result){
             $reultCode = 1;
             $resultMsg = '获取成功';
@@ -247,18 +248,20 @@ class PersonController extends Controller
         $category = new Category();
         $userLike = $result->toArray();
         $data = $userLike[0]['like_image_class'];
-        $category_ids = json_decode($data,true);
-        //var_dump($category_ids);
+        $datas = json_decode($data,true);
+       // $category_ids = explode(',',$data);
+        //var_dump($datas);
         $category_nameL = [];
-        foreach ($category_ids as $category_id)
+        foreach ($datas as $category_id)
         {
             $category_names = $category->getCategoryName($category_id)->toArray();
             $category_name = $category_names[0]['category_name'];
             $category_nameL[] = $category_name;
             //var_dump($category_name);
         }
-       // var_dump($category_nameL);
+        //var_dump($category_nameL);
         return Common::returnJsonResponse($reultCode,$resultMsg,$category_nameL);
+
     }
 
 

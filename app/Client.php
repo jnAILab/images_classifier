@@ -15,13 +15,13 @@ use Illuminate\Support\Facades\DB;
 
 class Client extends Model
 {
-    protected $primaryKey = 'user_id';
+   protected $primaryKey = 'user_id';
 
     public $timestamps = false;
 
-    public function getUserTaskLike($realname)
+    public function getUserTaskLike($user_id)
     {
-        $result = $this->select('like_image_class')->where('realname',$realname)->get();
+        $result = $this->select('like_image_class')->where('user_id',$user_id)->get();
         return $result;
     }
 
@@ -40,6 +40,7 @@ class Client extends Model
         $result->like_image_class = $array;
         return $result;
     }
+    
     public function registerClient($realname,$idcarNumber,$sex,$user_id){
         $result = $this->where('user_id','=',$user_id)->get();
         if(count($result)!=0){
