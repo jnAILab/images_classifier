@@ -31,7 +31,7 @@
             $candidacyOfImage = array_values(array_diff($allImagesIdInCategories, $allImagesIdInTask));
             //return count($candidacyOfImage);
             if(count($candidacyOfImage)== 0){
-                return null;//没有看推送的图片
+                return null;//没有能够推送的图片
             }
             $randomIndex = rand(0,count($candidacyOfImage)-1);//生成一个随机数来获取图片
            return $candidacyOfImage[$randomIndex];

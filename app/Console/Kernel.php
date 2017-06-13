@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+    	$filePath = 'F:\xampp\htdocs\images_classifier\public\console.log';
+        $schedule->exec('ipconfig')->everyMinute()->appendOutputTo($filePath);
     }
 }

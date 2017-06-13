@@ -115,12 +115,6 @@ $api->version('v1', function ($api) {
     $api->post('changePassword',[
         'uses'=>'App\Http\Controllers\PersonController@changePassword'
     ]);
-    //数据统计
-    $api->post('getData',[
-        'uses'=>'App\Http\Controllers\PersonController@getData'
-    ]);
-    
-    
     /*
      * 范留山
      * **/
@@ -213,7 +207,14 @@ $api->version('v1', function ($api) {
         $api->post('zipimage',[
             'uses'=>'App\Http\Controllers\ImageController@zipImage'
         ]);
-
+        //获取用户活跃度接口
+        $api->post('getLoginUserNumber',[
+            'uses'=>'App\Http\Controllers\PersonController@getLoginUserNumber'
+        ]);
+        //获取图片标记个数的接口
+        $api->post('getLabeledImageNumber',[
+            'uses'=>'App\Http\Controllers\ImageController@getLabeledImageNumber'
+        ]);
     });
 
 

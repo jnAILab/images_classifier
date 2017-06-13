@@ -287,29 +287,11 @@ class PersonController extends Controller
            return Common::returnJsonResponse(0,'上传失败',null);
         }
     }
-
-	/**
-         *@author 聂恒奥
-         * 获取12个月份数据
-         */
-        public function getData(){
-            $common = new Common();
-            $thismonth = intval(date('m'));
-            $thisyear = intval(date('Y'));
-            $datas = [];
-            for ($i = 0;$i<12;$i++){
-                $startDay = $thisyear . '-' . $thismonth . '-1';
-                $endDay = $thisyear . '-' . $thismonth . '-' . date('t', strtotime($startDay));
-                $data = $common->getData($startDay,$endDay);
-                $datas[$thisyear . '-' . $thismonth]=$data;
-                if ($thismonth == 1){
-                    $thismonth = 12;
-                    $thisyear = $thisyear-1;
-                }
-                else{
-                    $thismonth = $thismonth-1;
-                }
-            }
-            return Common::returnJsonResponse(1,'成功',$datas);
-        }
+    public function getLoginUserNumber(Request $request){
+        $userObj = new User();
+        $result = $userObj->where('last_login_ip','>',date('Y-m-d H:i:s',strtotime("-7 day")))
+            ->where('status','client')
+            ->get();
+        return Common::returnJsonResponse(1,'query successfully',array('userNumber'=>count($result)));
+    }
 }
