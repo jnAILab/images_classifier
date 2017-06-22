@@ -1,7 +1,8 @@
 <?php
 	namespace App\Http\Controllers;
 	
-	use App\Task;
+	use App\Image_Label;
+    use App\Task;
 	use App\Common;
 	use App\Image;
     use Tymon\JWTAuth\Facades\JWTAuth;
@@ -206,8 +207,14 @@
                 }
             }
             return $imageLocation;
-
-
+        }
+        public function getLabeledImageNumber(Request $request){
+            $imageLabelObj = new Image_Label();
+            $result = $imageLabelObj->all(); //获取全部的数据
+            $allLabeledImageNumber = count($result);
+            $result = $imageLabelObj->where('updated_at','>',date('Y-m-d H:i:s',strtotime("-7 day")))->get();//先获得一周内被操作过的图片列表。
+            $labeledImageNumberForWeek = count($result);
+            return Common::returnJsonResponse(1, 'query successful', array('allLabeledImageNumber'=>$allLabeledImageNumber,'labeledImageNumberForWeek'=>$labeledImageNumberForWeek));
         }
 	}
 ?>
