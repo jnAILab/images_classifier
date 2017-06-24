@@ -55,11 +55,8 @@ class LabelController extends Controller
             $remind = '查询失败';
         }
         //成功是data返回查询到的标签内容，否则data返回failure
-<<<<<<< HEAD
         return Common::returnJsonResponse($result0[0],$remind,$result0[1]);
-=======
-        return Common::returnJsonResponse($result,$remind,$data = $data1);
->>>>>>> origin/master
+
     }
 
     /**

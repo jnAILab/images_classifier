@@ -95,51 +95,23 @@ class Label extends Model{
     public function getLabelContent($user_id,$image_id)
     {
 
-        //获取user_id最后一位，image_id 后三位
-        //substr('字符串'，获取前（后）几位数值)
-        $task_name=substr($user_id,-1)."_".substr($image_id,-3)."_task";
+        $task_table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
+        Common::checkDatabaseByTableName($task_table_name);
 
         //获取图片任务表中某图片的label_id
-        $result0 = DB::table($task_name)
+        $result = DB::table($task_table_name)
             ->where('user_id',$user_id)
             ->where('image_id',$image_id)
-            ->get();
+            ->first();
 
-        //dd($result0);
-        //将得到的id赋值给$label_id
-        $label_id = $result0[0]->user_assign_label_id;
+        $all_label_name = json_decode($result->user_assign_label,true);//取出解码的标签名字典
 
-
-        $result1 = DB::table('label')
-            ->where('label_id',$label_id)
-            ->where('image_id',$image_id)
-            ->get();
-
-        $judge = $result1[0]->is_del;
-
-        if($judge==0)
-        {
-            //根据图片任务表查询更加准确
-            $result = DB::table($task_name)
-                ->where('user_id',$user_id)
-                ->where('image_id',$image_id)
-                ->get();
-            //定义一个空数组
-            $task = [];
-            if($result)
-            {
-                //为数组赋值
-                $task[0] = 1;
-                $task[1] = $result[0]->user_assign_label;
-                return $task;
-            }else{
-                $task[0] = 0;
-                $task[1] = null;
-                return $task;
-            }
+        $task = [];
+        if($result !==null){
+            $task[0] = 1;
+            $task[1] = $all_label_name;
+            return $task;
         }else{
-            //定义一个空数组
-            $task = [];
             $task[0] = 0;
             $task[1] = null;
             return $task;
@@ -255,10 +227,9 @@ class Label extends Model{
      *
      */
 
-    public function deleteLabel($image_id,$label_id)
+    public function deleteLabel($image_id,$user_id,$label_name,$label_id)
     {
 
-<<<<<<< HEAD
         $task_table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
         Common::checkDatabaseByTableName($task_table_name);
 
@@ -329,22 +300,11 @@ class Label extends Model{
             );
 
         //更新image_label表
-=======
-        //使用模型的create方法更新数据(将label表的标签内容和id更新)
-        $labelResult = Label::select('auto_id')->where('label_id','=',$label_id)->get();
-        $result0 = $labelResult->toArray();
-        if(count($result0)){//更新新的标签到数据库
-            Label::where('label_id',$label_id)
-                ->update([
-                    'is_del'=>1,
-                ]);
-        }
-        //更新image_label表，其中添加更新后的标签
->>>>>>> origin/master
         $result = DB::table('image_label')
             ->where('image_id',$image_id)
             ->where('label_id',$label_id)
             ->update(['is_del'=>1]);
+        //var_dump($result);
 
         //若为真则返回1，否则返回零
         if($result&&$result1)
