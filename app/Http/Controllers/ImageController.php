@@ -7,6 +7,7 @@
 	use App\Image;
     use Tymon\JWTAuth\Facades\JWTAuth;
 	use Illuminate\Http\Request;
+	use Illuminate\Support\Facades\DB;
 	
 	class ImageController extends Controller{
 		/**
@@ -29,8 +30,16 @@
 		*/
 		function createTasks($userId,$imagesIds){
 			$task = new Task();
-			$is_created = $task -> createTaskMarkImage($userId,$imagesIds);
-			return $is_created;
+            DB::beginTransaction();
+			foreach($imagesIds as $imagesId){
+                $is_created = $task -> createTaskMarkImage($userId,$imagesId);
+                if(!$is_created){
+                    DB::rollback();//事务回滚
+                    return false;
+                }
+            }
+            DB::commit();
+			return true;
 		}
         /**
          *
@@ -47,25 +56,28 @@
             }
         }
          */
-        public function pushImageToUser(Request $request){
+         public function pushImageToUser(Request $request){
             $imageObj = new Image();
             $user = JWTAuth::parseToken()->authenticate();
             $image_ids = $imageObj->pushImage($user);
             if($image_ids === null){
                 return Common::returnJsonResponse(0,'image\'s set is null','null');
             }
+
             $task_id = $this->createTasks($user->user_id,$image_ids);
-            return ;
-            $image = Image::select('image_location')->where('image_id','=',$image_id)->first();
-            //var_dump($task_id);
-            if($image_id === false){//用户身份错误
-                return Common::returnJsonResponse(0,'failed to push a image','null');
-            }else if($task_id === false){//任务创建失败
+            if($task_id === false){
                 return Common::returnJsonResponse(0,'failed to create a task','null');
+            }
+            $images = Image::select('image_location','image_id')->whereIn('image_id',$image_ids)->get();
+            $message = $images->toArray();
+
+            if($image_ids === false){
+                return Common::returnJsonResponse(0,'failed to push a image','null');
             }else{
-                return Common::returnJsonResponse(1,'push successful',array('image_location'=>$image->image_location,'image_id'=>$image_id,'task_id'=>$task_id));
+                return Common::returnJsonResponse(1,'push successful',$message);
             }
         }
+
         /**
          * 显示图片标记信息的函数
          *

@@ -31,12 +31,14 @@
             ]);
             if($task_result){
                 //插入数据成功
-                $task = DB::table($table_name)->select('task_id')->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
-                return $task->task_id;
+                #$task = DB::table($table_name)->select('task_id')->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
+                #return $task->task_id;
+                return true;
             }
             return false;//否则插入数据失败
-
 		}
+
+
 		/**
 		*
 		*@author 范留山

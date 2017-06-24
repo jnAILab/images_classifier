@@ -55,7 +55,11 @@ class LabelController extends Controller
             $remind = '查询失败';
         }
         //成功是data返回查询到的标签内容，否则data返回failure
+<<<<<<< HEAD
         return Common::returnJsonResponse($result0[0],$remind,$result0[1]);
+=======
+        return Common::returnJsonResponse($result,$remind,$data = $data1);
+>>>>>>> origin/master
     }
 
     /**
@@ -96,7 +100,7 @@ class LabelController extends Controller
             $remind = '更新失败';
         }
         //返回结果
-        return Common::returnJsonResponse($result,$remind,null);
+        return Common::returnJsonResponse($result,$remind,$data = null);
     }
 
     /**
@@ -126,7 +130,7 @@ class LabelController extends Controller
         $label_name = $request->input('label_name');
         $label_id = md5($label_name);
 
-        $result = $Label->deleteLabel($image_id,$user_id,$label_name,$label_id);
+        $result = $Label->deleteLabel($image_id,$label_id);
 
         if($result)
         {
@@ -135,7 +139,7 @@ class LabelController extends Controller
             $remind = '软删除失败';
         }
         //返回结果
-        return Common::returnJsonResponse($result,$remind,null);
+        return Common::returnJsonResponse($result,$remind,$data = null);
     }
 
 
