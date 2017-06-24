@@ -94,6 +94,24 @@ class PersonController extends Controller
         }
         return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
     }
+    /**
+     *@author 聂恒奥
+     * 获取用户个人信息
+     */
+    public function getPersonInformation(Request $request){
+        $user_id = JWTAuth::parseToken()->authenticate()->user_id;
+        $client = new Client();
+        $personInformation = $client->getPerInformationToShow($user_id);
+        if ($personInformation){
+            $ResultMsg = '成功';
+            $ResultCode = 1;
+        }
+        else{
+            $ResultMsg = '失败';
+            $ResultCode = 0;
+        }
+        return Common::returnJsonResponse($ResultCode,$ResultMsg,$personInformation);
+    }
     public function adminUpdateInformation(Request $request){
         $Common = new Common();
         $all = $request->all();
@@ -108,6 +126,30 @@ class PersonController extends Controller
             $ResultCode = 0;
         }
         return Common::returnJsonResponse($ResultCode,$ResultMsg,null);
+    }
+    /**
+     *@author 聂恒奥
+     * 获取12个月份数据
+     */
+    public function getData(){
+        $common = new Common();
+        $thismonth = intval(date('m'));
+        $thisyear = intval(date('Y'));
+        $datas = [];
+        for ($i = 0;$i<12;$i++){
+            $startDay = $thisyear . '-' . $thismonth . '-1';
+            $endDay = $thisyear . '-' . $thismonth . '-' . date('t', strtotime($startDay));
+            $data = $common->getData($startDay,$endDay);
+            $datas[$thisyear . '-' . $thismonth]=$data;
+            if ($thismonth == 1){
+                $thismonth = 12;
+                $thisyear = $thisyear-1;
+            }
+            else{
+                $thismonth = $thismonth-1;
+            }
+        }
+        return Common::returnJsonResponse(1,'成功',$datas);
     }
 
 
@@ -199,24 +241,6 @@ class PersonController extends Controller
             }
             return Common::returnJsonResponse($resultCode,$resultMsg,null);
         }
-        /**
-         *@author 聂恒奥
-         * 获取用户个人信息
-         */
-        public function getPersonInformation(Request $request){
-            $user_id = $request->input('user_id');
-            $client = new Client();
-            $personInformation = $client->getPerInformationToShow($user_id);
-            if ($personInformation){
-                $ResultMsg = '成功';
-                $ResultCode = 1;
-            }
-            else{
-                $ResultMsg = '失败';
-                $ResultCode = 0;
-            }
-            return Common::returnJsonResponse($ResultCode,$ResultMsg,$personInformation);
-        }
 
         /*
          * @auth 范留山
@@ -269,24 +293,50 @@ class PersonController extends Controller
 
     public function upload(Request $request)
     {
-    	$file = $request->file('zip');
-        //$file = $request->file('zip');
+        $file = $request->file('zip');
         $filename =  $file->getClientOriginalName();
         $filenames = explode('.',$filename);
-        $category_name = $filenames[0];
+        $file_name = $filenames[0];
         $extend = $filenames[1];
-        $zipname = $category_name.'.'.$extend;
-        $file->move('Image/'.$category_name.'/',$zipname);
-        $path = "Image/".$category_name."/";
-        $zipfile = zip_open('Image/'.$category_name.$zipname);
+        $tmp = md5('tmp');
+        $path = 'Image/'.$tmp.'/';
+        $zipname = $file_name.'.'.$extend;
+        $file->move($path,$zipname);
+        if($newzipname = str_replace('(','',$zipname))
+        {
+            $newzipname1 = str_replace(')','',$newzipname);
+            rename($path.$zipname,$path.$newzipname1);
+            $zipname = $newzipname1;
+        }
+        //$zipfile = zip_open('Image/'.$file_name.$zipname);
         $bool = system('unzip '.$path.$zipname.' -d '.$path);
-        system('rm -f '.$path.$filename);
-        if($bool){
-           return Common::returnJsonResponse(1,'上传成功',null);
+        system('rm -f '.$path.$zipname);
+        $images = glob($path.'*.*');
+        $extends = explode(",", "jpg,jpeg,png");
+        $flag = 0;
+        $flag1 = 0;
+        foreach ($images as $image)
+        {
+            $imagename = basename($image);
+            $image_names = explode('.',$imagename);
+            $image_name = $image_names[0];
+            $image_extend = $image_names[1];
+            if(in_array($image_extend,$extends)){
+                $bool1 = rename($path.$image_name.'.'.$image_extend,'Image/'.md5($image).'.'.$image_extend);
+                $flag1++;
+            }else{
+                $flag++;
+                system('rm -f '.$path.$image_name.'.'.$image_extend);
+            }
+        }
+        system('rm -rf Image/'.$tmp);
+        if($flag == 0&&$flag1 > 0){
+            return Common::returnJsonResponse(1,'上传成功',null);
         }else{
-           return Common::returnJsonResponse(0,'上传失败',null);
+            return Common::returnJsonResponse(0,'上传失败，压缩包可能存在非图片！',null);
         }
     }
+
     public function getLoginUserNumber(Request $request){
         $userObj = new User();
         $result = $userObj->where('last_login_ip','>',date('Y-m-d H:i:s',strtotime("-7 day")))

@@ -1,5 +1,5 @@
 <?php
-	
+
 namespace App;
 
 use Illuminate\Http\JsonResponse;
@@ -7,20 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 class Common extends Model
 {
-      /**
-       *
-       *
-       * @author 聂恒奥
-       *
-       * 用来更新单个个人信息，或是管理员批量修改一组用户的信息，可更新多个字段。
-       *
-       * @param $all
-       *
-       *
-       * @return $ResultCode
-       *
-       *
-       */
+    /**
+     *
+     *
+     * @author 聂恒奥
+     *
+     * 用来更新单个个人信息，或是管理员批量修改一组用户的信息，可更新多个字段。
+     *
+     * @param $all
+     *
+     *
+     * @return $ResultCode
+     *
+     *
+     */
     public function updatePersonInformation($all,$user_id){
 
         $ResultCode = 0;
@@ -114,7 +114,22 @@ class Common extends Model
         }
         return $ResultCode;
     }
-
+    /**
+     *@author 聂恒奥
+     * 获取数据
+     */
+    public function getData($startTime,$endTime){
+        $image = Image::whereBetween('created_at',[$startTime,$endTime])->get();
+        $label = Label::whereBetween('created_at',[$startTime,$endTime])->get();
+        $category = Category::whereBetween('created_at',[$startTime,$endTime])->get();
+        $user = Client::whereBetween('created_at',[$startTime,$endTime])->get();
+        $number = [];
+        $number['图片数'] = count($image);
+        $number['标签数'] = count($label);
+        $number['类别数'] = count($category);
+        $number['用户数'] = count($user);
+        return $number;
+    }
 
 
 
@@ -198,7 +213,7 @@ class Common extends Model
     public static function checkDatabaseByTableName($table_name){
         $tableResult = DB::select("select table_name from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'images_classifier' and TABLE_NAME = '$table_name'");
         if(count($tableResult)==0){
-           //不存在该表，创建该表。
+            //不存在该表，创建该表。
             DB::select('create table if not exists images_classifier.'.$table_name.'(
 				auto_id  INT(6) not null AUTO_INCREMENT,
 				primary key (auto_id),
@@ -206,8 +221,12 @@ class Common extends Model
 				user_id varchar(16) not null,
 				image_id varchar(32) not null, 
 				user_assign_label MEDIUMTEXT,
-				user_assign_label_id MEDIUMTEXT
-				)engine innoDB');
+				user_assign_label_id MEDIUMTEXT,
+				user_delete_label MEDIUMTEXT,
+				assign_time datetime NOT NULL,
+                mark_time datetime NOT NULL,
+                status int(1) NOT NULL DEFAULT 0 COMMENT \'标注当前任务的状态，0=被分配，但未完成的任务 1=完成标记的任务 -1=被跳过的任务\'
+				)ENGINE=InnoDB DEFAULT CHARSET=utf8');
             //sleep(1);//等待表建立成功
         }
     }

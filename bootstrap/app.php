@@ -143,8 +143,6 @@ $app->group(['namespace' => App\Http\Controllers::class], function ($app) {
 $app->routeMiddleware([
 	//添加管理员
 	'addAdmin' => App\Http\Middleware\AddAdminMiddleware::class,
-	//创建一个任务
-	'createOneTask' => App\Http\Middleware\CreateOneTaskMiddleware::class,
 	//添加图片类型
 	'storeCategory' => App\Http\Middleware\storeCategoryMiddleware::class,
     //更新图片类型

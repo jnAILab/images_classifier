@@ -78,14 +78,18 @@
 			foreach($task_tables as $task_table){
 				$tasks = DB::table($task_table)
 					->join('image','image.image_id',$task_table.'.image_id')
-					->select($task_table.'.task_id',$task_table.'.image_id',$task_table.'.user_assign_label',$task_table.".user_assign_label_id")
+					->select(
+						$task_table.'.task_id',
+						$task_table.'.image_id',
+						$task_table.'.user_assign_label',
+						$task_table.'.user_assign_label_id'
+					)
 					->where($task_table.'.user_id',$userId)
 					->where('image.is_del','0')
 					->get();
 
 				if(count($tasks)>0){
 					foreach($tasks as $task){
-
 						//判断任务状态
 						$imageInfomration = Image::select('image_location','end_time')
 							->where('image_id', $task->image_id)
@@ -156,17 +160,12 @@
 				->first();
 
             //image表中查找相关信息
-            $image_information = Image::select('category_id','image_location')
+            $image_information = Image::select('image_location')
                 ->where('image_id',$imageId)
-                ->first();
-            //类别表中查找相关信息
-            $category = Category::select('category_name')
-                ->where('category_id',$image_information['category_id'])
                 ->first();
             if($information->user_assign_label==null){//如果此任务还没有标签
                 return array(
                     'image_location'=>$image_information['image_location'],//加入此图片地址
-                    'category'=>$category['category_name'],
                     'label_information' => null
                 );
             }else{
@@ -195,7 +194,6 @@
 			return array(
 /*					'image_lable'=>array_keys(json_decode($information->user_assign_label,true)),*/
                     'image_location'=>$image_information['image_location'],//加入此图片地址
-					'category'=>$category['category_name'],
 					'label_information' => $all_labelInformation //json_decode($information->user_assign_label_id,true),
 					);
 		}

@@ -251,6 +251,40 @@ class Label extends Model{
             $all_label_name = json_decode($result1->user_assign_label,true);//取出解码的标签名字典
             $all_label_id = json_decode($result1->user_assign_label_id,true);//取出所有的解码的标签id字典
 
+            $all_label_name_keys = array_keys($all_label_name);//取出标签名字典中所有的key
+            $all_label_name_values = array_values($all_label_name);//取出标签名字典中所有的value
+
+            $new_all_label_name_keys=array();
+            $number=0;//用来记录数字
+            $this_number=-1;
+            foreach($all_label_name_keys as $label_name_key){
+                if($label_name_key==$label_name){
+                    $new_all_label_name_keys[]=$label_name;
+                    $this_number = $number;//保存要修改的标签在数组中的位置
+                }else{
+                    $new_all_label_name_keys[]=$label_name_key;
+                }
+                $number+=1;
+            }
+            $pop = $all_label_name_values[$this_number];//获取到下标为this_number的$all_label_name_values点赞数
+            $delete = [$label_name => $pop,];//将$label和pop转化为数组
+            $user_delete_label = $result1->user_delete_label;//获取user_delete_label字段的内容
+            if(is_null($user_delete_label)){
+                $result = DB::table($task_table_name)
+                    ->where('user_id',$user_id)
+                    ->where('image_id',$image_id)
+                    ->update(['user_delete_label' => json_encode($delete)]);
+
+            }else {
+                $all_delete_label = json_decode($result1->user_delete_label, true);//取出解码的标签名字典
+                $all_delete_labels = array_merge($all_delete_label, $delete);   //将需要新加的和刚获取的两个数组合并
+                //dd($all_delete_labels);
+                DB::table($task_table_name)
+                    ->where('user_id', $user_id)
+                    ->where('image_id', $image_id)
+                    ->update(['user_delete_label' => json_encode($all_delete_labels)]);
+
+            }
             unset($all_label_name[$label_name]);//删除user_assign_label中指定的label
             unset($all_label_id[$label_id]);//删除user_assign_label_id指定的label_id
         }
@@ -265,16 +299,7 @@ class Label extends Model{
                 ]
             );
 
-        //使用模型的create方法更新数据(将label表的标签内容和id更新)
-        $labelResult = Label::select('auto_id')->where('label_id','=',$label_id)->get();
-        $result0 = $labelResult->toArray();
-        if(count($result0)){//更新新的标签到数据库
-            Label::where('label_id',$label_id)
-                ->update([
-                    'is_del'=>1,
-                ]);
-        }
-        //更新image_label表，其中添加更新后的标签
+        //更新image_label表
         $result = DB::table('image_label')
             ->where('image_id',$image_id)
             ->where('label_id',$label_id)
@@ -282,7 +307,7 @@ class Label extends Model{
         //var_dump($result);
 
         //若为真则返回1，否则返回零
-        if($result)
+        if($result&&$result1)
         {
             return 1;
         }else{

@@ -29,15 +29,9 @@ class Client extends Model
 
         $result = DB::table('users')
             ->join('clients','clients.user_id','users.user_id')
-            ->select('name','realname','sex','idcarnumber','email','like_image_class')
+            ->select('name','realname','sex','idcarnumber','email')
             ->where('users.user_id',$user_id)
             ->first();
-        $result->like_image_class = json_decode($result->like_image_class);
-        $array = [];
-        foreach ($result->like_image_class as $id){
-            $array[] = Category::where('category_id',$id)->select('category_name')->first()->category_name;
-        }
-        $result->like_image_class = $array;
         return $result;
     }
     

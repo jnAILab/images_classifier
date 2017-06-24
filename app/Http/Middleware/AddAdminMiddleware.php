@@ -58,28 +58,16 @@ class AddAdminMiddleware
 			->where('email',$email)
 			->first();
 		//输入判断
-		if($username==''){
-			return ['resultCode'=>'0','remind'=>'请输入用户名'];
-		}elseif(strlen($username)>5){
-			return ['resultCode' => '0','remind' => '用户名长度不能大于5个字符'];
-		}elseif($name_result!=null){
-			return ['resultCode' => '0', "remind" => '用户名已存在'];
-		}elseif($password==''){
+		if($password==''){
 			return ['resultCode'=>'0','remind' => '请输入密码'];
 		}elseif(strlen($password)<6){
 			return ['resultCode' => '0','remind' => '密码长度不能小于6个字符'];
-		}elseif($password!=$passwordAgain){
-			return ['resultCode' => '0','remind' =>"两次输入密码不一致"];
 		}elseif($email==''){
 			return ['resultCode' => '0','remind' =>"请输入邮箱"];
 		}elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)){
 			return ['resultCode' => '0','remind' =>"输入邮箱不合法"];
 		}elseif($email_result!=null){
 			return ['resultCode' => '0', "remind" => '邮箱已经被注册'];
-		}elseif($employeeId==''){
-			return ['resultCode'=>'0','remind' => '请输入工号'];
-		}elseif(strlen($employeeId)>6){
-			return ['resultCode' => '0','remind' => '工号长度过长'];
 		}else{
 			return $next($request);
 		}

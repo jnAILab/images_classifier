@@ -55,7 +55,7 @@ class LabelController extends Controller
             $remind = '查询失败';
         }
         //成功是data返回查询到的标签内容，否则data返回failure
-        return Common::returnJsonResponse($result0[0],$remind,$result[1]);
+        return Common::returnJsonResponse($result0[0],$remind,$result0[1]);
     }
 
     /**
@@ -119,7 +119,6 @@ class LabelController extends Controller
     public function deleteLabel(Request $request)
     {
         $Label = new Label();
-
 
         //将获取信息赋值给变量
         $user_id = JWTAuth::parseToken()->authenticate()->user_id;
@@ -247,7 +246,7 @@ class LabelController extends Controller
         set_time_limit ( 0 );
 
         //处理成二维数组，以便储存为excel   [[图片id1，标签名数组1，用户名数组1],[图片id2，标签名数组2，用户名数组2],……]
-       $allData = array();
+        $allData = array();
         foreach($results as $imageId=>$result) {
             $data=array();
             $data[] = $imageId;

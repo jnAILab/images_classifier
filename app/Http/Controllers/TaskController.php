@@ -61,31 +61,7 @@
 		}
 		
 		
-		/**
-		*
-		*@author 范留山
-		*创建一个任务，用户喜欢的图片类型中随机选出一个图片推送出去
-		*
-		*@param  sendUserId ：md5加密的用户id
-		*@param  sendCategoryId ：图片类型id
-		*@
-		*@return  json数据  {
-		*						'resultCode'=>0,
-		*						'resultMsg'=>‘success’,
-		*						'data'=>{
-		*							'image_id' => 图片id,
-		*							'image_location'=>图片的地址,
-		*						}
-		*					};
-		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
-		*/
-		public function createTasks(Request $request){
-			$userId=$request->input('sendUserId');
-			$imagesId=$request->input('sendCategoryId');
-			$task = new Task();
-			$task -> createTaskMarkImage($userId,$imagesId);
-			return Common::returnJsonResponse(1,'成功创建任务','null');
-		}
+
 		
         	/**
 		*

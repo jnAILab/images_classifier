@@ -9,7 +9,6 @@
 	use Illuminate\Http\Request;
 	
 	class ImageController extends Controller{
-
 		/**
 		*
 		*@author 范留山
@@ -28,9 +27,9 @@
 		*					};
 		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
 		*/
-		function createTasks($userId,$imagesId){
+		function createTasks($userId,$imagesIds){
 			$task = new Task();
-			$is_created = $task -> createTaskMarkImage($userId,$imagesId);
+			$is_created = $task -> createTaskMarkImage($userId,$imagesIds);
 			return $is_created;
 		}
         /**
@@ -51,11 +50,12 @@
         public function pushImageToUser(Request $request){
             $imageObj = new Image();
             $user = JWTAuth::parseToken()->authenticate();
-            $image_id = $imageObj->pushImage($user);
-            if($image_id === null){
+            $image_ids = $imageObj->pushImage($user);
+            if($image_ids === null){
                 return Common::returnJsonResponse(0,'image\'s set is null','null');
             }
-            $task_id = $this->createTasks($user->user_id,$image_id);
+            $task_id = $this->createTasks($user->user_id,$image_ids);
+            return ;
             $image = Image::select('image_location')->where('image_id','=',$image_id)->first();
             //var_dump($task_id);
             if($image_id === false){//用户身份错误
@@ -77,7 +77,6 @@
             $data = $imageObj->getImageMarkedInformation($imageId);
             return Common::returnJsonResponse(1,'push successful',$data);
         }
-
         /**
          * 获取某个类别里面未被标记的图片列表
          * */
@@ -88,7 +87,6 @@
             $data = $imageObj->getImageUnmarkedList($imageId);
             return Common::returnJsonResponse(1,'push successful',$data);
         }
-
         /**
          * 获取某个类别里面已被标记的图片列表
          * */
@@ -99,8 +97,6 @@
             $data = $imageObj->getImageMarkedList($imageId);
             return Common::returnJsonResponse(1,'push successful',$data);
         }
-
-
         /**
          * @author dain 2017.6.4 15:00
          * 根据图片id 将图片移动到以当前用户user_id命名的文件夹进行打包
@@ -118,19 +114,14 @@
          * ps：请在linux上安装zip程序
          * ps：请在linux上安装zip程序
          */
-
-
         public function zipImage(Request $request)
         {
             $image_ids = $request->input('image_id');
             $user_id = JWTAuth::parseToken()->authenticate()->user_id;//获取当前用户$user_id,创建下载文件�?
-
             //$imageLocation = array();
             $getLocation = new Image();
             $imageLocation = $getLocation->getImageLocationInImage($image_ids);
             $newLocation = 'Image/download/' . $user_id;//下载文件夹打包地址
-
-
             if (!is_dir('Image/download/' . $user_id)) {
                 mkdir("Image/download/" . $user_id);
             } else {//删除
@@ -145,7 +136,6 @@
             foreach ($imageLocation as $location){
                 exec("cp $location $newLocation");
             }
-
             if (!is_file($user_id . '.zip')) {
                 //unlink($user_id . 'zip');
                 //进行压缩
@@ -185,7 +175,6 @@
                     return Common::returnJsonResponse('true', 'zip successful', $zipfile);
                 }
             }
-
         }
         /**
          * @author dain 2017.6.4 15:00

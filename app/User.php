@@ -100,7 +100,6 @@ class User extends Model implements
             ->select(
                 'users.user_id',
                 'clients.sex',
-                'clients.like_image_class',
                 'clients.created_at',
                 'users.name',
                 'users.email'
@@ -108,20 +107,9 @@ class User extends Model implements
             ->get()
        ->toArray();
 
-        //将类别id数组替换为类别名称数组
-        foreach ($clients as $client) {
-
-            $like_image_class=array();
-            foreach (json_decode($client->like_image_class,true) as $labelId) {
-                $like_image_class[]= Category::select('category_name')
-                    ->where('category_id',$labelId)
-                    ->first()
-                ->category_name;
-            }
-            $client->like_image_class = $like_image_class;
-        }
         return $clients;
     }
+
     function registerUser($name,$email,$password,$status){
         $user_id = uniqid();
         $selectResult = $this->where('email','=',$email)->get();

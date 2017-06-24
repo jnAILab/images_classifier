@@ -55,21 +55,12 @@ $api->version('v1', function ($api) {
         /**
 	*author 范留山
 	*/
-//	//创建一个任务
-//	$api->post('/createTask',[
-//		'uses' => 'App\Http\Controllers\TaskController@createTasks',
-//		'middleware' => 'createOneTask',
-//	]);
-
 	//查看一个任务信息
 	$api->post('/taskInformation',[
 		'uses' => 'App\Http\Controllers\TaskController@getTasks',
 	]);
 
-	//查看任务列表
-	$api->post('/taskList',[
-		'uses' => 'App\Http\Controllers\TaskController@getTaskList',
-	]);
+
 	//更新一个任务信息
 	$api->post('/updateTask',[
 		'uses' => 'App\Http\Controllers\TaskController@updateTask',
@@ -96,25 +87,33 @@ $api->version('v1', function ($api) {
             'uses'=>'App\Http\Controllers\LabelController@deleteLabel'
         ]);
 
-    /**
-     *author 聂恒奥
-     */
-    //获取用户信息
-    $api->post('getPersonInformation',[
-        'uses'=>'App\Http\Controllers\PersonController@getPersonInformation'
-    ]);
-    //用户修改个人信息
-    $api->post('updatePersonInformation',[
-        'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
-    ]);
-    //更加积分
-    $api->post('increaseUserPoints',[
-        'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
-    ]);
-    //修改密码
-    $api->post('changePassword',[
-        'uses'=>'App\Http\Controllers\PersonController@changePassword'
-    ]);
+        /**
+         *author 聂恒奥
+         */
+        //获取数据
+        $api->post('getData',[
+            'uses'=>'App\Http\Controllers\PersonController@getData'
+        ]);
+        //获取用户信息
+        $api->post('getPersonInformation',[
+            'uses'=>'App\Http\Controllers\PersonController@getPersonInformation'
+        ]);
+        //管理员修改用户信息
+        $api->post('adminUpdateInformation',[
+            'uses'=>'App\Http\Controllers\PersonController@adminUpdateInformation'
+        ]);
+        //用户修改个人信息
+        $api->post('updatePersonInformation',[
+            'uses'=>'App\Http\Controllers\PersonController@updatePersonInformation'
+        ]);
+        //更加积分
+        $api->post('increaseUserPoints',[
+            'uses'=>'App\Http\Controllers\PersonController@increaseUserPoints'
+        ]);
+        //修改密码
+        $api->post('changePassword',[
+            'uses'=>'App\Http\Controllers\PersonController@changePassword'
+        ]);
     /*
      * 范留山
      * **/
