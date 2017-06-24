@@ -33,7 +33,10 @@ class Image extends Model{
                 return $this->randomGetImageIds($user->user_id);
             }else{
                 //根据用户的喜好分配200张图片
-                return $this->getImagesBySocket($user->user_id);
+                $image_id = json_decode($this->getImagesBySocket($user->user_id));
+                //print_r($image_id);
+                $randomImageIds = $this->randomGetImageIds($user->user_id);
+                return array_merge($image_id,$randomImageIds);
             }
         }else{
             return $imageCheckResult;//返回图片ids
@@ -42,19 +45,19 @@ class Image extends Model{
     }
 
     public function getImagesBySocket($user_id){
-        $host = 'tcp://192.168.2.6:12307';
+        $host = 'tcp://122.112.253.167:12308';
         $fp = stream_socket_client ( $host, $errno, $error, 20 );
         if(!$fp){
             echo "$error ($errno)";
         }else{
             fwrite ($fp,$user_id);
-            while (!feof($fp))
-            {
+            while (!feof($fp)){
+                //var_dump($fp);
                 $image_ids = fgets($fp); #获取服务器返回的内容
             }
             fclose ($fp);
         }
-        print_r($image_ids);
+        return $image_ids;
     }
 
     public function checkUserImageInformation($user_id){
@@ -77,14 +80,20 @@ class Image extends Model{
     public function checkImagesIdByTask($user_id){
         //获取用户已被分配的任务
         $imagesId = $this->getAssignTask($user_id);
-
+        if(count($imagesId)==0){
+            return false;
+        }
         $result = DB::table('image')->select('status')->whereIn('image_id',$imagesId)->get();
         //将所有查询到的status结果相加到一起，若大于0则图片中包含已被分类的图片，则认为该用户已经被分配了任务。
-        $flag = 0;
+        $unfinished = false;
         foreach($result as $image){
-            $flag += $image->status;
+            if($image->status == 0){
+                $unfinished = true;
+                break;
+            }
         }
-        if(!$flag){
+        //echo $flag;
+        if(!$unfinished){
             //用户未被分配任务
             return false;
         }else{

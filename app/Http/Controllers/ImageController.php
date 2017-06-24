@@ -63,7 +63,8 @@
             if($image_ids === null){
                 return Common::returnJsonResponse(0,'image\'s set is null','null');
             }
-
+            //var_dump($image_ids);
+            //return;
             $task_id = $this->createTasks($user->user_id,$image_ids);
             if($task_id === false){
                 return Common::returnJsonResponse(0,'failed to create a task','null');

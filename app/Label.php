@@ -10,6 +10,20 @@ class Label extends Model{
 
     protected $guarded = ['auto_id'];  //不可批量添加的字段
 
+    public function skipImage($table_name,$task_id)
+    {
+
+        DB::table($table_name)->where('task_id','=',$task_id)
+            ->update(
+                [
+                    'mark_time'=>date('Y-m-d H:i:s'),
+                    'status'=>-1//当前任务已经被跳过
+                ]
+            );
+    }
+
+
+
     /**
      *
      * @auther 张政茂
@@ -65,8 +79,44 @@ class Label extends Model{
                 [
                     'user_assign_label'=>json_encode($user_assign_label),
                     'user_assign_label_id'=>json_encode($user_assign_label_id),
+                    'mark_time'=>date('Y-m-d H:i:s'),
+                    'status'=>1//当前任务已经被标记
                 ]
             );
+        //更新图片的信息
+        $image = DB::table('image')->where('image_id','=',$image_id)->first();
+        DB::table('image')->where('image_id','=',$image_id)
+            ->update(
+                [
+                    'spread_time'=>(int)($image->spread_time)+1,//图片的传播次数增加1
+                    'updated'=>1//图片信息进行过更新
+                ]
+            );
+
+        $image = DB::table('image')->where('image_id','=',$image_id)->first();
+        //检测部分
+        if($image->status == 0){
+            if($image->spread_time>=20){
+                DB::table('image')->where('image_id','=',$image_id)
+                    ->update(
+                    [
+                        'spread_time'=>0,//图片开始正式分类，传播次数重新置零
+                        'status'=>1,//该图片开始正式分类
+                        'updated'=>1//图片信息进行过更新
+                    ]
+                );
+            }
+        }else if($image->status == 1){
+            if($image->spread_time>=50){
+                DB::table('image')->where('image_id','=',$image_id)
+                    ->update(
+                        [
+                            'status'=>2,//该图片结束分类
+                            'updated'=>0
+                        ]
+                    );
+            }
+        }
         if($result){
             return true;
         }else{
