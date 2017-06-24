@@ -323,7 +323,7 @@ class Label extends Model{
     public function imageExecl(){
 
         //获取不重复的所有的图片id
-        $images= image_label::select('image_id')
+        $images= Image_Label::select('image_id')
             ->distinct()
             ->get();
 

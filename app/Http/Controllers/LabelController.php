@@ -12,7 +12,6 @@ use App\Common;
 use App\Label;
 use App\Image_Label;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LabelController extends Controller
