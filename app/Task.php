@@ -17,9 +17,13 @@
 		*@return true;
 		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
 		*/
-		public function createTaskMarkImage($user_id,$image_id){
+		public function createTaskMarkImage($user_id,$image_ids){
             //根据用户名和图片id获取表名
-            $table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
+            $table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_ids);
+
+
+
+            return;
             //检查一下这个表是否存在，如果不存在就创建出来。
             Common::checkDatabaseByTableName($table_name);
 

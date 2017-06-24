@@ -28,9 +28,9 @@
 		*					};
 		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
 		*/
-		function createTasks($userId,$imagesId){
+		function createTasks($userId,$imagesIds){
 			$task = new Task();
-			$is_created = $task -> createTaskMarkImage($userId,$imagesId);
+			$is_created = $task -> createTaskMarkImage($userId,$imagesIds);
 			return $is_created;
 		}
         /**
@@ -51,11 +51,12 @@
         public function pushImageToUser(Request $request){
             $imageObj = new Image();
             $user = JWTAuth::parseToken()->authenticate();
-            $image_id = $imageObj->pushImage($user);
-            if($image_id === null){
+            $image_ids = $imageObj->pushImage($user);
+            if($image_ids === null){
                 return Common::returnJsonResponse(0,'image\'s set is null','null');
             }
-            $task_id = $this->createTasks($user->user_id,$image_id);
+            $task_id = $this->createTasks($user->user_id,$image_ids);
+            return ;
             $image = Image::select('image_location')->where('image_id','=',$image_id)->first();
             //var_dump($task_id);
             if($image_id === false){//用户身份错误
