@@ -44,16 +44,10 @@ class AddAdminMiddleware
 	public function handle($request, Closure $next){
 		
 		//接收数据
-		$username=$request->input('sendUsername');
 		$password=$request->input('sendPassword');
-		$passwordAgain=$request->input('sendPasswordAgain');
 		$email=$request->input('sendEmail');
-		$employeeId=$request->input('sendEmployeeId');
 		
 		//查找用户名，用于判断用户名是否存在
-		$name_result = User::select('name')
-			->where('name',$username)
-			->first();
 		$email_result = User::select('email')
 			->where('email',$email)
 			->first();
