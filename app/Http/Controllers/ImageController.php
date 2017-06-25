@@ -196,7 +196,7 @@
                             ]
                         );
                         //随机选取20个用户 并分配任务
-                        $randomkeys = array_rand($userArray,3);
+                        $randomkeys = array_rand($userArray,20);
                         foreach ($randomkeys as $randomkey)
                         {
                             //var_dump($userArray[$randomkey]);
@@ -337,6 +337,16 @@
             $result = $imageLabelObj->where('updated_at','>',date('Y-m-d H:i:s',strtotime("-7 day")))->get();//先获得一周内被操作过的图片列表。
             $labeledImageNumberForWeek = count($result);
             return Common::returnJsonResponse(1, 'query successful', array('allLabeledImageNumber'=>$allLabeledImageNumber,'labeledImageNumberForWeek'=>$labeledImageNumberForWeek));
+        }
+
+        /**
+         *范留山
+         *图片标记数统计图
+         **/
+        public function imageSignNumber (Request $request){
+            $image = new Image();
+            $result = $image->imageSignNumber();
+            return Common::returnJsonResponse(1, '获取图片标记数成功', $result);
         }
 	}
 ?>

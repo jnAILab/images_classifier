@@ -295,4 +295,79 @@ class PersonController extends Controller
             ->get();
         return Common::returnJsonResponse(1,'query successfully',array('userNumber'=>count($result)));
     }
+
+    /**
+     *@author 聂恒奥
+     * 获取新增图片数
+     */
+    public function getImageData(){
+        date_default_timezone_set('PRC');
+        $data = [];
+        $number = [];
+        $timeAxis = ['五周前','四周前','三周前','二周前','一周前','当前周'];
+        $common = new Common();
+        for ($i = 5;$i>0;$i--){
+            $startDay = date("Y-m-d 00:00:00",strtotime("-{$i} week Monday"));
+            $endDay = date("Y-m-d 23:59:59",strtotime("-{$i} week Sunday"));
+            $number[] = $common->getImageData($startDay,$endDay);
+        }
+        $startDay = date("Y-m-d 00:00:00",strtotime("+0 week Monday"));
+        $endDay = date("Y-m-d 23:59:59",strtotime("+0 week Sunday"));
+        $number[] = $common->getImageData($startDay,$endDay);
+        $data['timeAxis'] = $timeAxis;
+        $data['number'] = $number;
+        return Common::returnJsonResponse(1,'成功',$data);
+    }
+
+    /**
+     *
+     *@author 葛操
+     *
+     * 获取活跃用户数
+     *
+     *
+     */
+    public function getActiveUser()
+    {
+        date_default_timezone_set('PRC');
+        $Atimes = DB::table('users')->select('updated_at')->get()->toArray();
+        //var_dump($Atimes);
+        $allUsers = 0;
+        $activeUsers = 0;
+        foreach ($Atimes as $Atime)
+        {
+            $allUsers++;
+            //var_dump($Atime->updated_at);
+            $week = date('Y-m-d',strtotime($Atime->updated_at));
+            //var_dump($week);
+            $nowWeek = date('Y-m-d',time());
+            $dayNum = $this->weekToweek($week,$nowWeek);
+            var_dump($dayNum);
+            if($dayNum <= 6)
+            {
+                $activeUsers++;
+            }
+        }
+        $data['totalUsers'] = $allUsers;
+        $data['activeUsers'] = $activeUsers;
+
+        return Common::returnJsonResponse(1,'获取活跃用户数成功',$data);
+    }
+
+    //求天数之差
+    protected function weekToweek($week1,$week2)
+    {
+        // date_default_timezone_set('PRC');
+        $d1 = strtotime($week1);
+        $w1 = date('w',$d1);
+        //var_dump($w1.'w1');
+
+        $d2 = strtotime($week2);
+        $w2 = date('w',$d2);
+
+        $Days = round(($d1-$d2)/3600/24);
+        return abs($Days);
+    }
+
+
 }

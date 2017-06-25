@@ -21,7 +21,7 @@
 			//根据用户名和图片id获取表名
 			$table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
 			//检查一下这个表是否存在，如果不存在就创建出来。
-			Common::checkDatabaseByTableName($table_name);
+			Common::checkDatabaseByTableNqme($table_name);
 			$select_result = DB::table($table_name)->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
 			if(count($select_result)>0){
 				return $select_result->status;
@@ -55,7 +55,6 @@
 		*@todo 传参，返回内容的修改
 		*/
 		public function getTaskList($userId){
-			
 			//获取此数据库所有表名
 			$tables=DB::select("select table_name from information_schema.tables where table_schema='images_classifier'");
 
@@ -94,7 +93,6 @@
 					->where($task_table.'.user_id',$userId)
 					->where('image.is_del','0')
 					->get();
-
 				if(count($tasks)>0){
 					foreach($tasks as $task){
 						//判断任务状态
@@ -126,6 +124,7 @@
 								$all_information[$task->task_id][$a_label_id]['like_number'] = $like->like_number;
 								$all_information[$task->task_id][$a_label_id]['state'] = $state;
 
+
 								$number += 1;
 
 							}
@@ -133,6 +132,7 @@
 							$all_information[$task->task_id]['image_id']=$task->image_id;
 							$all_information[$task->task_id]['image_location'] = $imageInfomration->image_location;
 							$all_information[$task->task_id]['state']=$state;
+
 						}
 					}
 				}

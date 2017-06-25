@@ -51,7 +51,7 @@ $api->version('v1', function ($api) {
             'uses'=>'App\Http\Controllers\PersonController@addAdmin',
             'middleware' => 'addAdmin'
         ]);
-        
+
         /**
 	*author 范留山
 	*/
@@ -59,7 +59,6 @@ $api->version('v1', function ($api) {
 	$api->post('/taskInformation',[
 		'uses' => 'App\Http\Controllers\TaskController@getTasks',
 	]);
-
 
 	//更新一个任务信息
 	$api->post('/updateTask',[
@@ -70,6 +69,10 @@ $api->version('v1', function ($api) {
 	$api->post('/delectTask',[
 		'uses' => 'App\Http\Controllers\TaskController@delectTask',
 	]);
+    //任务列表
+    $api->post('/taskList',[
+        'uses' => 'App\Http\Controllers\TaskController@getTaskList',
+    ]);
 
         /**
          *author 张政茂
@@ -86,6 +89,10 @@ $api->version('v1', function ($api) {
         $api->post('deleteLabel',[
             'uses'=>'App\Http\Controllers\LabelController@deleteLabel'
         ]);
+        $api->post('getNewAddLabelNumber',[
+            'uses'=>'App\Http\Controllers\LabelController@getNewAddLabelNumber'
+        ]);
+
 
         /**
          *author 聂恒奥
@@ -114,9 +121,14 @@ $api->version('v1', function ($api) {
         $api->post('changePassword',[
             'uses'=>'App\Http\Controllers\PersonController@changePassword'
         ]);
-    /*
-     * 范留山
-     * **/
+        //获取新增图片数
+        $api->post('getImageData',[
+            'uses'=>'App\Http\Controllers\PersonController@getImageData'
+        ]);
+
+        /*
+         * 范留山
+         * **/
     $api->post('showUserList',[
         'uses'=>'App\Http\Controllers\PersonController@showUserList'
     ]);
@@ -124,6 +136,9 @@ $api->version('v1', function ($api) {
         	/**
 	*author 葛操
 	*/
+        $api->post('getActiveUser',[
+            'uses'=>'App\Http\Controllers\PersonController@getActiveUser'
+        ]);
         $api->post('getUserTaskLike',[
             'uses'=>'App\Http\Controllers\PersonController@getUserTaskLike'
         ]);
@@ -134,7 +149,7 @@ $api->version('v1', function ($api) {
         ]);
 
 
-	$api->post('getCategoryList',[
+        $api->post('getCategoryList',[
 		'uses'=>'App\Http\Controllers\CategoryController@getCategoryList'
 	]);
 	$api->post('storegetCategories',[
@@ -190,13 +205,9 @@ $api->version('v1', function ($api) {
         $api->post('getImageMarkedInformation',[
             "uses"=>'App\Http\Controllers\ImageController@getImageMarkedInformation'
         ]);
-        //获取某个类别里面未被标记的图片列表
-        $api->post('getImageUnmarkedList',[
-            "uses"=>'App\Http\Controllers\ImageController@getImageUnmarkedList'
-        ]);
-        //获取某个类别里面未被标记的图片列表
-        $api->post('getImageMarkedList',[
-            "uses"=>'App\Http\Controllers\ImageController@getImageMarkedList'
+        //图片标记数
+        $api->post('imageSignNumber',[
+            "uses"=>'App\Http\Controllers\ImageController@imageSignNumber'
         ]);
 
         /*

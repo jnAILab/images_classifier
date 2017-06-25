@@ -4,6 +4,8 @@ use App\Client;
 use App\Common;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Expr\Array_;
+
 class Image extends Model{
     protected $table = 'image';  //指定表名
     protected $primaryKey = 'auto_id';  //指定主键
@@ -227,6 +229,101 @@ class Image extends Model{
         return Common::returnJsonResponse(1, 'query successful', array('allLabeledImageNumber'=>$allLabeledImageNumber,'labeledImageNumberForWeek'=>$labeledImageNumberForWeek));
     }
 
+    //图片标记数统计图
+    public function imageSignNumber(){
+        $taskNames=Array();
+        $tableNames = DB::select("select table_name from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'images_classifier' ");
+        foreach($tableNames as $tableName){
+            if(strstr($tableName->table_name,"task")){
+                $taskNames[]=$tableName->table_name;
+            }
+        }
+
+        date_default_timezone_set('PRC');
+        $number_wk=date("w",time());
+        if($number_wk==0){
+            $number_wk=7;
+        }
+        $oneDay = 60*60*24;
+        $theLastWeek = time()-$oneDay*$number_wk;
+
+        $allTasksNumber=array();
+        $allFinishTasksNumber=array();
+        foreach($taskNames as $tableName){
+            $allTasksNumber[]=DB::table($tableName)
+                ->select('assign_time')
+                ->get()
+                ->toArray();
+            $allFinishTasksNumber[]=DB::table($tableName)
+                ->where('status',1)
+                ->select('assign_time')
+                ->get()
+                ->toArray();
+        }
+
+        $total=self::getNumber($allTasksNumber);
+        $completion=self::getNumber($allFinishTasksNumber);
+
+        $data=[
+            'timeAxis'=>['五周前','四周前','三周前','两周前','一周前','本周'],
+            'total'=>$total,
+            'completion'=>$completion
+        ];
+
+        return $data;
+    }
+
+    //给定格式化的时间，返回属于第几周
+    public function week($time){
+        $time=strtotime($time);
+        date_default_timezone_set('PRC');
+        $now=time();
+        $number_wk=date("w",$now);
+        if($number_wk==0){
+            $number_wk=7;
+        }
+        $oneDay=60*60*24;
+        $day=(strtotime(date('Y-m-d'))-strtotime(date('Y-m-d',$time)))/$oneDay;
+        if($day<$number_wk){
+            $week=0;
+        }else{
+            $week=1+floor(($day-$number_wk)/7);//floor去尾法取整数
+        }
+        return $week;
+    }
+
+    //给定两钟情况的总数，返回以六个周分组，格式化好的数据。
+    public function getNumber($data){
+        $one=0;
+        $two=0;
+        $three=0;
+        $four=0;
+        $five=0;
+        $six=0;
+        foreach($data as $oneTable){
+            if($oneTable!=[]){
+                foreach($oneTable as $oneTask){
+                    if($oneTask!=[]){
+                        $week = self::week($oneTask->assign_time);
+                        if($week==0){
+                            $one+=1;
+                        }elseif($week==1){
+                            $two+=1;
+                        }elseif($week==2){
+                            $three+=1;
+                        }elseif($week==3){
+                            $four+=1;
+                        }elseif($week==4){
+                            $five+=1;
+                        }elseif($week==5){
+                            $six+=1;
+                        }
+                    }
+                }
+            }
+        }
+        return [$six,$five,$four,$three,$two,$one];
+    }
 
 }
 ?>

@@ -421,6 +421,48 @@ class Label extends Model{
 
         return $finallyInformation;
     }
+
+    /**
+     *@auther 张政茂
+     *
+     *获取新增标签数量
+     *
+     * @param user_id : 用户的id
+     *
+     *
+     * @return {
+     *      "Result": 1/0,
+     *      "remind": "获取成功"/"获取失败",
+     *      "Date": {
+     *              timeAxis{FiveWeeksAgo,FoursWeeksAgo,ThreeWeeksAgo,TwoWeeksAgo,AWeekAgo};
+     *              number{123,321,123,231,111,222,333}
+     *              }
+     * }
+     */
+
+    public function getNewAddLabelNumber(Request $request)
+    {
+
+        $Label = new Label();
+
+        //将获取信息赋值给变量
+        $user_id = JWTAuth::parseToken()->authenticate()->user_id;
+
+        $result = $Label->getNewAddLabelNumber();
+
+        if($result)
+        {
+            $resultcode = 1;
+            $remind = '获取成功';
+        }else{
+            $resultcode = 0;
+            $remind = '获取失败';
+        }
+        //返回结果
+        return Common::returnJsonResponse($resultcode,$remind,$result);
+
+    }
+
 }
 
 ?>
