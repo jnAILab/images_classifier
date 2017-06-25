@@ -29,19 +29,22 @@
 		*					};
 		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
 		*/
-		function createTasks($userId,$imagesIds){
-			$task = new Task();
+        function createTasks($userId,$imagesIds){
+            $task = new Task();
+            $imageInfo = array();
             DB::beginTransaction();
-			foreach($imagesIds as $imagesId){
+            foreach($imagesIds as $imagesId){
                 $is_created = $task -> createTaskMarkImage($userId,$imagesId);
-                if(!$is_created){
+                if($is_created === false){
                     DB::rollback();//事务回滚
                     return false;
                 }
+                $imageInfo[$imagesId] = $is_created;
             }
             DB::commit();
-			return true;
-		}
+            return $imageInfo;
+        }
+
         /**
          *
          *@author killer 2017年6月2日20:31:29
@@ -57,7 +60,7 @@
             }
         }
          */
-         public function pushImageToUser(Request $request){
+        public function pushImageToUser(Request $request){
             $imageObj = new Image();
             $user = JWTAuth::parseToken()->authenticate();
             $image_ids = $imageObj->pushImage($user);
@@ -66,19 +69,22 @@
             }
             //var_dump($image_ids);
             //return;
-            $task_id = $this->createTasks($user->user_id,$image_ids);
-            if($task_id === false){
+            $task_ids = $this->createTasks($user->user_id,$image_ids);
+            if($task_ids === false){
                 return Common::returnJsonResponse(0,'failed to create a task','null');
             }
             $images = Image::select('image_location','image_id')->whereIn('image_id',$image_ids)->get();
             $message = $images->toArray();
-
+            foreach($message as $index =>$item){
+                $message[$index]["status"] =$task_ids[$item['image_id']];
+            }
             if($image_ids === false){
                 return Common::returnJsonResponse(0,'failed to push a image','null');
             }else{
                 return Common::returnJsonResponse(1,'push successful',$message);
             }
         }
+
 
         /**
          * 显示图片标记信息的函数

@@ -18,29 +18,30 @@
 		*@todo  1.用户是否可以有重复的任务，如：用户第二次标记某一个图片（当前可以有）；2.传参、返回内容的修改；
 		*/
 		public function createTaskMarkImage($user_id,$image_id){
-            //根据用户名和图片id获取表名
-            $table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
-            //检查一下这个表是否存在，如果不存在就创建出来。
-            Common::checkDatabaseByTableName($table_name);
-            $select_result = DB::table($table_name)->where('user_id','=',$user_id)->where('image_id','=',$image_id)->get();
-            if(count($select_result)>0){
-                return true;
-            }
-            //$table(A_BBB_task)表中插入任务信息
-            $task_result = DB::table($table_name)->insert([
-                'task_id'=> uniqid(),
-                'user_id' => $user_id,
-                'image_id' => $image_id,
-                'assign_time'=>date('Y-m-d H:i:s')
-            ]);
-            if($task_result){
-                //插入数据成功
-                #$task = DB::table($table_name)->select('task_id')->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
-                #return $task->task_id;
-                return true;
-            }
-            return false;//否则插入数据失败
+			//根据用户名和图片id获取表名
+			$table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
+			//检查一下这个表是否存在，如果不存在就创建出来。
+			Common::checkDatabaseByTableName($table_name);
+			$select_result = DB::table($table_name)->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
+			if(count($select_result)>0){
+				return $select_result->status;
+			}
+			//$table(A_BBB_task)表中插入任务信息
+			$task_result = DB::table($table_name)->insert([
+				'task_id'=> uniqid(),
+				'user_id' => $user_id,
+				'image_id' => $image_id,
+				'assign_time'=>date('Y-m-d H:i:s')
+			]);
+			if($task_result){
+				//插入数据成功
+				#$task = DB::table($table_name)->select('task_id')->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
+				#return $task->task_id;
+				return true;
+			}
+			return false;//否则插入数据失败
 		}
+
 
 
 		/**
