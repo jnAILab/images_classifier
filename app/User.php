@@ -126,11 +126,13 @@ class User extends Model implements
                 'status'=>$status,
                 'created_at'=>date('Y-m-d H:i:s'),
                 'updated_at'=>date('Y-m-d H:i:s'),
-                'last_login_ip'=>date('Y-m-d H:i:s')
+                'last_login_ip'=>$_SERVER["REMOTE_ADDR"]
             ]);
         }catch (Exception $e){
             return false;
         }
         return $user_id;
     }
+
+
 }

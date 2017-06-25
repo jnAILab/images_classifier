@@ -203,23 +203,30 @@ class Image extends Model{
      * @param $image_ids
      * @return array
      */
-    public function getImageLocationInImage($image_ids)
-    {
+    public function getImageLocationInImage($image_ids){
         $imageLocation = array();
         //dd($image_ids);
-        foreach ($image_ids as $image_id) {
+        foreach ($image_ids as $image_id){
             $image_locations = DB::table('image')
                 ->where('image_id', $image_id)
                 ->select('image_location')
                 ->get();
 //               dd($image_locations);
-            foreach ($image_locations as $image_location) {
+            foreach ($image_locations as $image_location){
                 $imageLocation[] = $image_location->image_location;
             }
         }
         return $imageLocation;
-
     }
+    public function getLabeledImageNumber(Request $request){
+        $imageLabelObj = new Image_Label();
+        $result = $imageLabelObj->all(); //获取全部的数据
+        $allLabeledImageNumber = count($result);
+        $result = $imageLabelObj->where('updated_at','>',date('Y-m-d H:i:s',strtotime("-7 day")))->get();//先获得一周内被操作过的图片列表。
+        $labeledImageNumberForWeek = count($result);
+        return Common::returnJsonResponse(1, 'query successful', array('allLabeledImageNumber'=>$allLabeledImageNumber,'labeledImageNumberForWeek'=>$labeledImageNumberForWeek));
+    }
+
 
 }
 ?>

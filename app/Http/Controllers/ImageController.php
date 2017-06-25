@@ -241,16 +241,21 @@
          * ps：请在linux上安装zip程序
          * ps：请在linux上安装zip程序
          */
+
+
         public function zipImage(Request $request)
         {
             $image_ids = $request->input('image_id');
-            $user_id = JWTAuth::parseToken()->authenticate()->user_id;//获取当前用户$user_id,创建下载文件�?
+            $user_id = JWTAuth::parseToken()->authenticate()->user_id;//获取当前用户$user_id,创建下载文件 ?
+
             //$imageLocation = array();
             $getLocation = new Image();
             $imageLocation = $getLocation->getImageLocationInImage($image_ids);
-            $newLocation = 'Image/download/' . $user_id;//下载文件夹打包地址
-            if (!is_dir('Image/download/' . $user_id)) {
-                mkdir("Image/download/" . $user_id);
+            $newLocation = 'download/' . $user_id;//下载文件夹打包地址
+
+
+            if (!is_dir('download/' . $user_id)) {
+                mkdir("download/" . $user_id);
             } else {//删除
                 $allImage = glob($newLocation . '/*');
                 foreach ($allImage as $file) {
@@ -261,8 +266,9 @@
                 }
             }
             foreach ($imageLocation as $location){
-                exec("cp $location $newLocation");
+                exec("cp $location $newLocation");//拷贝图片
             }
+
             if (!is_file($user_id . '.zip')) {
                 //unlink($user_id . 'zip');
                 //进行压缩
@@ -270,7 +276,7 @@
                 /*用php的exec执行Linux命令 括号里的字符串就是你在Linux命令窗口里敲的命令；
                 第二个参数是linux执行该命令后返回的结果数组；
                 linux执行返回的每一条结果依次存入该数组
-                第三个参数是结果，如果执行成功，则Linux返回结果值为0，如果执行失败，则结果值不�?
+                第三个参数是结果，如果执行成功，则Linux返回结果值为0，如果执行失败，则结果值不 ?
                 */
                 exec("zip -r $user_id'.zip' $newLocation", $outputs, $rc);//exec调用linux命令
                 if ($rc != 0) {
@@ -289,7 +295,7 @@
                 /*用php的exec执行Linux命令 括号里的字符串就是你在Linux命令窗口里敲的命令；
                 第二个参数是linux执行该命令后返回的结果数组；
                 linux执行返回的每一条结果依次存入该数组
-                第三个参数是结果，如果执行成功，则Linux返回结果值为0，如果执行失败，则结果值不�?
+                第三个参数是结果，如果执行成功，则Linux返回结果值为0，如果执行失败，则结果值不 ?
                 */
                 exec("zip -r $user_id'.zip' $newLocation", $outputs, $rc);//exec调用linux命令
                 if ($rc != 0) {

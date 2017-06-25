@@ -137,8 +137,12 @@ class AuthController extends Controller
     {
         $userObj = new User();
         $user = $userObj->where('email','=',$email)->first();
+        $userObj->where('email','=',$email)->update([
+            'updated_at'=>date('Y-m-d H:i:s')
+        ]);
         return Common::returnJsonResponse(1,'token_generated',array('token' => $token,'user_id'=>$user->status));
     }
+
 
     /**
      * Get the needed authorization credentials from the request.
