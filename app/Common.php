@@ -121,12 +121,10 @@ class Common extends Model
     public function getData($startTime,$endTime){
         $image = Image::whereBetween('created_at',[$startTime,$endTime])->get();
         $label = Label::whereBetween('created_at',[$startTime,$endTime])->get();
-        $category = Category::whereBetween('created_at',[$startTime,$endTime])->get();
         $user = Client::whereBetween('created_at',[$startTime,$endTime])->get();
         $number = [];
         $number['图片数'] = count($image);
         $number['标签数'] = count($label);
-        $number['类别数'] = count($category);
         $number['用户数'] = count($user);
         return $number;
     }

@@ -5,6 +5,7 @@
     use App\Task;
 	use App\Common;
 	use App\Image;
+    use App\User;
     use Tymon\JWTAuth\Facades\JWTAuth;
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Facades\DB;
@@ -63,7 +64,8 @@
             if($image_ids === null){
                 return Common::returnJsonResponse(0,'image\'s set is null','null');
             }
-
+            //var_dump($image_ids);
+            //return;
             $task_id = $this->createTasks($user->user_id,$image_ids);
             if($task_id === false){
                 return Common::returnJsonResponse(0,'failed to create a task','null');
@@ -109,6 +111,113 @@
             $data = $imageObj->getImageMarkedList($imageId);
             return Common::returnJsonResponse(1,'push successful',$data);
         }
+
+
+        /**
+         *
+         *@author 葛操 2017年6月2日20:31:29
+         *上传图片并分配任务
+         *
+         *@param  Request $request
+         *@return  json
+         * {
+        "ResultCode": 1,
+        "ResultMsg": "上传成功",
+        "Data": null
+        }
+         */
+        public function upload(Request $request)
+        {
+            $task = new Task();
+            //从user表中选取全部user_id，以便在创建任务
+            $users = DB::table('users')->where('status','client')->select('user_id')->get()->toArray();
+            $userArray = array();
+            foreach ($users as $user)
+            {
+                array_push($userArray,$user->user_id);
+            }
+            //var_dump($randomkeys);
+            $file = $request->file('zip');
+            $filename =  $file->getClientOriginalName();
+            $filenames = explode('.',$filename);
+            $file_name = $filenames[0];
+            $extend = $filenames[1];
+            $tmp = md5('tmp');
+            $path = 'Image/'.$tmp.'/';
+            $zipname = $file_name.'.'.$extend;
+            $file->move($path,$zipname);
+            if($newzipname = str_replace('(','',$zipname))
+            {
+                $newzipname1 = str_replace(')','',$newzipname);
+                rename($path.$zipname,$path.$newzipname1);
+                $zipname = $newzipname1;
+            }
+            //$zipfile = zip_open('Image/'.$file_name.$zipname);
+            $bool = system('unzip '.$path.$zipname.' -d '.$path);
+            system('rm -f '.$path.$zipname);
+            $images = glob($path.'*.*');
+            $extends = explode(",", "jpg,jpeg,png");
+            $flag = 0;
+            $flag1 = 0;
+            date_default_timezone_set('PRC');
+            //从image表中选取image_id 用于创建任务
+            $image_ids = DB::table('image')->select('image_id')->get()->toArray();
+            $image_idArray = array();
+            foreach ($image_ids as $image_id)
+            {
+                array_push($image_idArray,$image_id->image_id);
+            }
+            //var_dump($image_idArray);
+            foreach ($images as $image)
+            {
+                $imagename = basename($image);
+                $image_names = explode('.',$imagename);
+                $image_name = $image_names[0];
+                $image_extend = $image_names[1];
+                if(in_array($image_extend,$extends)){
+                    $newImageName = md5($image);
+                    $newImageNames = $newImageName.'.'.$image_extend;
+                    $bool1 = rename($path.$image_name.'.'.$image_extend,'Image/'.$newImageName);
+                    if(!(in_array($newImageName,$image_idArray)))
+                    {
+                        Image::create(
+                            [
+                                'image_id'=>$newImageName,
+                                'image_location'=>'public/Image/'.$newImageNames,
+                                'image_author_id'=>'5932e222209bf',
+                                'upload_time'=>date("Y-m-d H:i:s"),
+                                'updated'=>1
+                            ]
+                        );
+                        //随机选取20个用户 并分配任务
+                        $randomkeys = array_rand($userArray,3);
+                        foreach ($randomkeys as $randomkey)
+                        {
+                            //var_dump($userArray[$randomkey]);
+                            $result = $task->createTaskMarkImage($userArray[$randomkey],$newImageName);
+                            //var_dump($result);
+                        }
+                    }
+
+
+
+                    $flag1++;
+                }else{
+                    $flag++;
+                    system('rm -f '.$path.$image_name.'.'.$image_extend);
+                }
+            }
+            system('rm -rf Image/'.$tmp);
+            if($flag == 0&&$flag1 > 0){
+                return Common::returnJsonResponse(1,'上传成功',null);
+            }else{
+                return Common::returnJsonResponse(0,'上传失败，压缩包可能存在非图片！',null);
+            }
+        }
+
+
+
+
         /**
          * @author dain 2017.6.4 15:00
          * 根据图片id 将图片移动到以当前用户user_id命名的文件夹进行打包

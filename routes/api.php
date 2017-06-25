@@ -130,7 +130,7 @@ $api->version('v1', function ($api) {
 
 
         $api->post('upload',[
-            'uses'=>'App\Http\Controllers\PersonController@upload'
+            'uses'=>'App\Http\Controllers\ImageController@upload'
         ]);
 
 
