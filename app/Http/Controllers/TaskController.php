@@ -114,7 +114,5 @@
 			$data = $task -> delectTask($userId,$imageId,$taskId);
 			return Common::returnJsonResponse(1,'成功删除任务',$data);
 		}
-
-
 	}
 ?>
