@@ -228,4 +228,14 @@ class Common extends Model
             //sleep(1);//等待表建立成功
         }
     }
+    /**
+     *@author 聂恒奥
+     * 获取新增图片数
+     */
+    public function getImageData($startTime,$endTime){
+        $image = Image::whereBetween('upload_time',[$startTime,$endTime])->get();
+        $number = count($image);
+        return $number;
+    }
+
 }

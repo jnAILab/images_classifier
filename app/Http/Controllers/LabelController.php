@@ -203,7 +203,6 @@ class LabelController extends Controller
     }
 
     public function likeLabelWithImage(Request $request){
-
         $image_id = $request->input('image_id');
         $label_id = $request->input('label_id');
         //信息不完整
@@ -220,8 +219,6 @@ class LabelController extends Controller
             return Common::returnJsonResponse(0,'data is not complete',$data = null);
         }
         return $this->updateLikeNumber($image_id,$label_id,$like = false);
-        //$result = $this->updateLikeNumber($image_id,$label_id,$like = false);
-        //var_dump($result);
     }
     function updateLikeNumber($image_id,$label_id,$like = true){
 
@@ -289,5 +286,41 @@ class LabelController extends Controller
 
         unset ( $sheet );
         unset ( $dataArr );
+    }
+
+
+    /**
+     * @auther 张政茂
+     * @param $user_id : 用户
+     *
+     *获取每周新增标签数量
+     *
+     *
+     */
+
+    public function getNewAddLabelNumber()
+    {
+
+
+        $timeAxis =[];
+        $number =[];
+        $all = [];
+        $i = 0;
+        for ($num1 = 5;$num1 >= 0;$num1--)
+        {
+            date_default_timezone_set('PRC');
+            $Label = new Label();
+            $startDay = ($num1+1)*7;
+            $endDay = $num1*7;
+            $startTime = date('Y-m-d H:i:s',strtotime("-{$startDay} day"));
+            $endTime = date('Y-m-d H:i:s',strtotime("-{$endDay} day"));
+            $label = $Label::whereBetween('created_at',[$startTime,$endTime])->get();
+            $timeAxis[$i] = "{$num1}周前";
+            $number[$i] =  count($label);
+            $i++;
+        }
+        $all['timeAxis'] = $timeAxis;
+        $all['number'] = $number;
+        return $all;
     }
 }

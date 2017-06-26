@@ -54,15 +54,13 @@ class Image_Label extends Model
     }
     public function updateLikeNumber($image_id,$label_id,$like = true){
         $result = $this->whereRaw('image_id = ? and label_id = ?',[$image_id,$label_id])->first();
-        if(count($result)==0){
-            return false;
-        }
         if($like){
             $like_number = (int)($result->like_number)+1;
         }else{
             $like_number = (int)($result->like_number)-1;
         }
-        $updatedResult = $this->whereRaw('image_id = ? and label_id = ?',[$image_id,$label_id])->update(['like_number'=>$like_number]);
+        $updatedResult = $this->whereRaw('image_id = ? and label_id = ?',[$image_id,$label_id])
+            ->update(['like_number'=>$like_number]);
         if($updatedResult){
             return true;
         }else{

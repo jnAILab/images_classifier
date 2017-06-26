@@ -76,7 +76,7 @@
             $images = Image::select('image_location','image_id')->whereIn('image_id',$image_ids)->get();
             $message = $images->toArray();
             foreach($message as $index =>$item){
-                $message[$index][] =$task_ids[$item['image_id']];
+                $message[$index]["status"] =$task_ids[$item['image_id']];
             }
             if($image_ids === false){
                 return Common::returnJsonResponse(0,'failed to push a image','null');
@@ -196,7 +196,7 @@
                             ]
                         );
                         //随机选取20个用户 并分配任务
-                        $randomkeys = array_rand($userArray,3);
+                        $randomkeys = array_rand($userArray,20);
                         foreach ($randomkeys as $randomkey)
                         {
                             //var_dump($userArray[$randomkey]);
@@ -265,7 +265,7 @@
                     //mkdir("Image/download/" . $user_id);
                 }
             }
-            foreach ($imageLocation as $location) {
+            foreach ($imageLocation as $location){
                 exec("cp $location $newLocation");//拷贝图片
             }
 
@@ -283,12 +283,12 @@
                     foreach ($outputs as $ko => $vo) {
                         echo "$vo<br/>";
                     }
-                    return Common::returnJsonResponse(0, 'zip unsuccessful', null);
+                    return Common::returnJsonResponse('false', 'zip unsuccessful', null);
                 } else {
                     $zipfile = $user_id . '.zip';
-                    return Common::returnJsonResponse(1, 'zip successful', $zipfile);
+                    return Common::returnJsonResponse('true', 'zip successful', $zipfile);
                 }
-            } else {
+            }else {
                 unlink($user_id . '.zip');
                 //进行压缩
                 $outputs = array();
@@ -302,10 +302,10 @@
                     foreach ($outputs as $ko => $vo) {
                         echo "$vo<br/>";
                     }
-                    return Common::returnJsonResponse(0, 'zip unsuccessful', null);
+                    return Common::returnJsonResponse('false', 'zip unsuccessful', null);
                 } else {
                     $zipfile = $user_id . '.zip';//文件下载输出后删除相关文件
-                    return Common::returnJsonResponse(1, 'zip successful', $zipfile);
+                    return Common::returnJsonResponse('true', 'zip successful', $zipfile);
                 }
             }
         }
@@ -337,6 +337,16 @@
             $result = $imageLabelObj->where('updated_at','>',date('Y-m-d H:i:s',strtotime("-7 day")))->get();//先获得一周内被操作过的图片列表。
             $labeledImageNumberForWeek = count($result);
             return Common::returnJsonResponse(1, 'query successful', array('allLabeledImageNumber'=>$allLabeledImageNumber,'labeledImageNumberForWeek'=>$labeledImageNumberForWeek));
+        }
+
+        /**
+         *范留山
+         *图片标记数统计图
+         **/
+        public function imageSignNumber (Request $request){
+            $image = new Image();
+            $result = $image->imageSignNumber();
+            return Common::returnJsonResponse(1, '获取图片标记数成功', $result);
         }
 	}
 ?>
