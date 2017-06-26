@@ -128,10 +128,6 @@ class Common extends Model
         $number['用户数'] = count($user);
         return $number;
     }
-
-
-
-
     /**
      *
      * @author 聂恒奥
@@ -181,13 +177,15 @@ class Common extends Model
      * @return table_name
      */
     public static function generateDatabaseNamesByClientId($user_id){
-        $tablesName = array();
+        //$tablesName = array();
+        $defineArray = array('clients','admins','image','image_label','label','	migrations','password_resets','users');
         $tableTopName = substr($user_id,-1);//获取用户id的最后一个字符
         //$tableResult = DB::select("SHOW TABLES LIKE '$tableTailName%'");
         $tableResult = DB::select("select table_name from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'images_classifier' and TABLE_NAME LIKE'$tableTopName%'");
         foreach($tableResult as $table){
             $tablesName[] = $table->table_name;
         }
+        $tablesName = array_diff($tablesName,$defineArray);
         return $tablesName;
     }
     /**
