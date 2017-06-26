@@ -53,7 +53,7 @@ class Image_Label extends Model
         }
     }
     public function updateLikeNumber($image_id,$label_id,$like = true){
-        $result = $this->whereRaw('image_id = ? and label_id = ?',[$image_id,$label_id])->first();
+        $result = $this->whereRaw('image_id = ? and label_id = ? and is_del = 1',[$image_id,$label_id])->first();
         if(count($result)==0){
             return false;
         }
@@ -71,7 +71,10 @@ class Image_Label extends Model
     }
     public function updateLikeNumberPerUser($image_id,$label_id,$like = true){
         DB::beginTransaction();
-        $result = $this->whereRaw('image_id = ? and label_id = ?',[$image_id,$label_id])->first();
+        $result = $this->whereRaw('image_id = ? and label_id = ? and is_del = 1',[$image_id,$label_id])->first();
+        if(count($result)==0){
+            return false;
+        }
         $user_ids = json_decode($result->users_added,true);
         $label = Label::select('label_name')->where('label_id','=',$label_id)->first();
         $label_name = $label->label_name;

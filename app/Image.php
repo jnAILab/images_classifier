@@ -156,7 +156,7 @@ class Image extends Model{
         $info = DB::table('image_label')
             ->leftJoin('label', 'image_label.label_id', '=', 'label.label_id')
             ->select('image_label.image_id', 'label.label_name',"image_label.label_id","image_label.like_number")
-            ->where('image_id',$id)
+            ->where('image_id','=',$id)->where('is_del','=','0')->orderBy('image_label.like_number', 'asc')->limit(5)
             ->get();
         return $info;
     }
