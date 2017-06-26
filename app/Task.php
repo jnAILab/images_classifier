@@ -21,10 +21,10 @@
 			//根据用户名和图片id获取表名
 			$table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
 			//检查一下这个表是否存在，如果不存在就创建出来。
-			Common::checkDatabaseByTableNqme($table_name);
+			Common::checkDatabaseByTableName($table_name);
 			$select_result = DB::table($table_name)->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
 			if(count($select_result)>0){
-				return $select_result->status;
+				return array('status'=>$select_result->status,'task_id'=>$select_result->task_id);
 			}
 			//$table(A_BBB_task)表中插入任务信息
 			$task_result = DB::table($table_name)->insert([

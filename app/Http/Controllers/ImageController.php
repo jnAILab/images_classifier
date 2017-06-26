@@ -53,11 +53,11 @@
          *@param  Request $request
          *@return  json
          * {
-            "ResultCode": 1,
-            "ResultMsg": "push successful",
-            "Data": {
-                "image_id": "imageId3"
-            }
+        "ResultCode": 1,
+        "ResultMsg": "push successful",
+        "Data": {
+        "image_id": "imageId3"
+        }
         }
          */
         public function pushImageToUser(Request $request){
@@ -76,7 +76,7 @@
             $images = Image::select('image_location','image_id')->whereIn('image_id',$image_ids)->get();
             $message = $images->toArray();
             foreach($message as $index =>$item){
-                $message[$index]["status"] =$task_ids[$item['image_id']];
+                $message[$index][] =$task_ids[$item['image_id']];
             }
             if($image_ids === false){
                 return Common::returnJsonResponse(0,'failed to push a image','null');
@@ -84,7 +84,6 @@
                 return Common::returnJsonResponse(1,'push successful',$message);
             }
         }
-
 
         /**
          * 显示图片标记信息的函数
@@ -283,10 +282,10 @@
                     foreach ($outputs as $ko => $vo) {
                         echo "$vo<br/>";
                     }
-                    return Common::returnJsonResponse('false', 'zip unsuccessful', null);
+                    return Common::returnJsonResponse(0, 'zip unsuccessful', null);
                 } else {
                     $zipfile = $user_id . '.zip';
-                    return Common::returnJsonResponse('true', 'zip successful', $zipfile);
+                    return Common::returnJsonResponse(1, 'zip successful', $zipfile);
                 }
             }else {
                 unlink($user_id . '.zip');
@@ -302,10 +301,10 @@
                     foreach ($outputs as $ko => $vo) {
                         echo "$vo<br/>";
                     }
-                    return Common::returnJsonResponse('false', 'zip unsuccessful', null);
+                    return Common::returnJsonResponse(0, 'zip unsuccessful', null);
                 } else {
                     $zipfile = $user_id . '.zip';//文件下载输出后删除相关文件
-                    return Common::returnJsonResponse('true', 'zip successful', $zipfile);
+                    return Common::returnJsonResponse(1, 'zip successful', $zipfile);
                 }
             }
         }

@@ -219,6 +219,8 @@ class LabelController extends Controller
             return Common::returnJsonResponse(0,'data is not complete',$data = null);
         }
         return $this->updateLikeNumber($image_id,$label_id,$like = false);
+        //$result = $this->updateLikeNumber($image_id,$label_id,$like = false);
+        //var_dump($result);
     }
     function updateLikeNumber($image_id,$label_id,$like = true){
 
