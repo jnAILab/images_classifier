@@ -308,27 +308,7 @@
                 }
             }
         }
-        /**
-         * @author dain 2017.6.4 15:00
-         * 操作数据库读取image_location
-         * @param $image_ids
-         * @return array
-         */
-        public function getImageLocationInImage($image_ids){
-            $imageLocation = array();
-            //dd($image_ids);
-            foreach ($image_ids as $image_id){
-                $image_locations = DB::table('image')
-                    ->where('image_id', $image_id)
-                    ->select('image_location')
-                    ->get();
-//               dd($image_locations);
-                foreach ($image_locations as $image_location){
-                    $imageLocation[] = $image_location->image_location;
-                }
-            }
-            return $imageLocation;
-        }
+
         public function getLabeledImageNumber(Request $request){
             $imageLabelObj = new Image_Label();
             $result = $imageLabelObj->all(); //获取全部的数据

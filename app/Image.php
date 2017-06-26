@@ -160,44 +160,6 @@ class Image extends Model{
             ->get();
         return $info;
     }
-    /**
-     * 获取某个类别里面未被标记的图片列表
-     * @param $category
-     *
-     * @return $info
-     * */
-    public function getImageUnmarkedList($category){
-        if(empty($category)){
-            $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
-                ->where('image_label.label_id',null)
-                ->get();
-        }else{
-            $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
-                ->where('image.category_id',$category)
-                ->where('label_id',null)
-                ->get();
-        }
-        return $info;
-    }
-    /**
-     * 获取某个类别里面已被标记的图片列表
-     * @param $category
-     *
-     * @return $info
-     * */
-    public function getImageMarkedList($category){
-        if(empty($category)){
-            $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
-                ->where('label_id','!=',null)
-                ->get();
-        }else{
-            $info = Image::leftJoin('image_label', 'image.image_id', '=', 'image_label.image_id')
-                ->where('category_id',$category)
-                ->where('label_id','!=',null)
-                ->get();
-        }
-        return $info;
-    }
 
     /**
      * @author dain 2017.6.4 15:00
