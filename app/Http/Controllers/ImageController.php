@@ -84,6 +84,12 @@
                 return Common::returnJsonResponse(1,'push successful',$message);
             }
         }
+        public function searchVaguelyImages(Request $request){
+            $labels = $request -> input("reach");
+            $imageObj = new Image();
+            $image_ids = $imageObj->searchVaguelyImages($labels);
+            return $image_ids;
+        }
 
         /**
          * 显示图片标记信息的函数

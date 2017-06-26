@@ -35,7 +35,7 @@ class Image extends Model{
                 return $this->randomGetImageIds($user->user_id);
             }else{
                 //根据用户的喜好分配200张图片
-                $image_id = json_decode($this->getImagesBySocket($user->user_id));
+                $image_id = json_decode($this->getImagesBySocket('push:'.$user->user_id));
                 //print_r($image_id);
                 $randomImageIds = $this->randomGetImageIds($user->user_id);
                 return array_merge($image_id,$randomImageIds);
@@ -71,7 +71,10 @@ class Image extends Model{
             return true;
         }
     }
-
+    public function searchVaguelyImages($labels){
+        $image_id = json_decode($this->getImagesBySocket('search:'.$labels));
+        return $image_id;
+    }
 
     /**
      * @author killer 2017年6月4日01:48:11
