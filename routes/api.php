@@ -212,7 +212,10 @@ $api->version('v1', function ($api) {
         $api->post('imageSignNumber',[
             "uses"=>'App\Http\Controllers\ImageController@imageSignNumber'
         ]);
-
+        //查看图片信息
+        $api->post('imageInfomration',[
+            "uses"=>'App\Http\Controllers\ImageController@imageInfomration'
+        ]);
         /*
          * auth 田荣鑫
          * **/

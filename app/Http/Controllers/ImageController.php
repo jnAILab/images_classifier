@@ -333,5 +333,16 @@
             $result = $image->imageSignNumber();
             return Common::returnJsonResponse(1, '获取图片标记数成功', $result);
         }
+
+        /**
+         *范留山
+         *查看图片信息
+         **/
+        public function imageInfomration (Request $request){
+            $imageId = $request->input('sendImageId');
+            $image=new Image();
+            $imageInformation=$image->imageInfomration($imageId);
+            return Common::returnJsonResponse(1, '查看图片信息成功', $imageInformation);
+        }
 	}
 ?>

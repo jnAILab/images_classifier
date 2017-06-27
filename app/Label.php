@@ -379,47 +379,72 @@ class Label extends Model{
 
         //获取信息
         $data=array();
+        $number=0;
         foreach ($images as $image) {
             $data[$image->image_id] = Label::join("image_label","image_label.label_id","label.label_id")
+                ->join("image","image.image_id","image_label.image_id")
                 ->select("label.label_name","image_label.like_number","image_label.users_added")
                 ->where('image_label.image_id',$image->image_id)
                 ->where('image_label.is_del',0)
+
                 ->orderBy('image_label.like_number', 'DESC')
                 ->take(3)
-                ->get();
+                ->get()
+                ->toArray();
+            $image_location= Image::select('image_location')
+                ->where('image_id',$image->image_id)
+                ->first()
+                ->toArray();
+            Array_unshift($data[$image->image_id],['image_location'=>reset($image_location)]);
+            $number+=1;
 
         }
 
         //将用户名和标签处理成数组
         $finallyInformation =array();
+        $otherInformation = array();
+        $number=0;
         foreach($data as $imageId=>$oneData){
             $userIdsListOne=array();
             $labelName=array();
             foreach($oneData as $information){
-                $labelName[] = $information->label_name;
-                $userIdsListTwo=array();
-                foreach(json_decode($information->users_added,true) as $userIds){
-                    if(count($userIds)>1){
-                        foreach($userIds as $oneUserId){
+                if(count($information)!=1){
+                    $labelName[] = $information['label_name'];
+                    $userIdsListTwo=array();
+                    foreach(json_decode($information['users_added'],true) as $userIds){
+                        if(count($userIds)>1){
+                            foreach($userIds as $oneUserId){
+                                $userName=User::select('name')
+                                    ->where('user_id',$oneUserId)
+                                    ->first();
+                                $userIdsListTwo[]=$userName->name;
+                            }
+                        }else{
                             $userName=User::select('name')
-                                ->where('user_id',$oneUserId)
+                                ->where('user_id',$userIds)
                                 ->first();
                             $userIdsListTwo[]=$userName->name;
                         }
-                    }else{
-                        $userName=User::select('name')
-                            ->where('user_id',$userIds)
-                            ->first();
-                        $userIdsListTwo[]=$userName->name;
                     }
+                    $userIdsListOne[]=$userIdsListTwo;
+                }else{
+                   $image_location=$information;
                 }
-                $userIdsListOne[]=$userIdsListTwo;
+
             }
+            $otherInformation[$number]['image_id']=$imageId;
+            $otherInformation[$number]['label_name_list']=$labelName;
+            if(isset($image_location)){
+                $otherInformation[$number]['image_location']=$image_location['image_location'];
+            }else{
+                $otherInformation[$number]['image_location']=$image_location['未找到图片位置'];
+            }
+
+            $number+=1;
             $finallyInformation[$imageId]['label_name_list']=$labelName;
             $finallyInformation[$imageId]['user_id_list']=$userIdsListOne;
         }
-
-        return $finallyInformation;
+        return ['otherInformation'=>$otherInformation,'finallyInformation'=>$finallyInformation];
     }
 
     /**

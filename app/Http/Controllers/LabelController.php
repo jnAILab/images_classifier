@@ -240,12 +240,10 @@ class LabelController extends Controller
 
     /**
      * @author 范留山 2017-6-11
-     * 查看 图片id，对该图片进行过标注的用户（数组返回用户名），改图片已经有的标签（数组返回标签名）
-     * @param image_id 图片id 数组
      */
     public function seeExport(Request $request){
         $label = new Label();
-        $results = $label->imageExecl();
+        $results = $label->imageExecl()['otherInformation'];
         return Common::returnJsonResponse(1,'查找成功',$results);
     }
     /**
@@ -256,7 +254,7 @@ class LabelController extends Controller
     public function imageExecl (Request $request)
     {
         $label = new Label();
-        $results = $label->imageExecl();
+        $results = $label->imageExecl()['finallyInformation'];
         set_time_limit ( 0 );
 
         //处理成二维数组，以便储存为excel   [[图片id1，标签名数组1，用户名数组1],[图片id2，标签名数组2，用户名数组2],……]

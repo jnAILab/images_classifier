@@ -290,5 +290,68 @@ class Image extends Model{
         return [$six,$five,$four,$three,$two,$one];
     }
 
+    public function imageInfomration($imageId){
+
+        //$imageInformations总的图片信息
+        //图片id，图片地址
+        $imageInformations=Image::select('image_id','image_location')
+            ->where('image_id',$imageId)
+            ->first();
+
+        //标签添加人 及其前三的标签
+        $imageLabelAdds =Image_Label::select("users_added")
+            ->where('image_label.image_id',$imageId)
+            ->where('image_label.is_del',0)
+            ->get()
+            ->toArray();
+
+        $userLabels=Array();
+        foreach($imageLabelAdds as $imageLabelAdd){
+            $userAddeds=json_decode($imageLabelAdd['users_added'],true);
+            foreach($userAddeds as $userAdded){
+                $userName=User::select('name')
+                    ->where('user_id',$userAdded)
+                    ->first();
+                $labelNames= Image_Label::join("label","label.label_id","image_label.label_id")
+                    ->select('label.label_name')
+                    ->where('image_label.image_id',$imageId)
+                    ->where('image_label.users_added','like','%'.$userAdded.'%')
+                    ->where('image_label.is_del',0)
+                    ->orderBy('image_label.like_number', 'DESC')
+                    ->take(3)
+                    ->get()
+                    ->toArray();
+                    $userLabels[$userName['name']]=$labelNames;
+            }
+        }
+        //规范化用户对应前三的便签
+        foreach($userLabels as $user=>$userLabel){
+            $labels=array();
+            foreach($userLabel as $label){
+                $labels[]=$label['label_name'];
+            }
+            $userLabels[$user]=$labels;
+
+        }
+        $imageInformations['users_addeds']=$userLabels;
+
+
+        //添加总体前三的标签
+        $imageLabelTopThree= Image_Label::join("label","label.label_id","image_label.label_id")
+            ->select('label.label_name')
+            ->where('image_label.image_id',$imageId)
+            ->where('image_label.is_del',0)
+            ->orderBy('image_label.like_number', 'DESC')
+            ->take(3)
+            ->get()
+            ->toArray();
+        $imageLabelTopThreeChange=Array();
+        foreach($imageLabelTopThree as $label){
+            $imageLabelTopThreeChange[]=$label['label_name'];
+        }
+        $imageInformations['image_label_top_three']=$imageLabelTopThreeChange;
+
+        return $imageInformations;
+    }
 }
 ?>
