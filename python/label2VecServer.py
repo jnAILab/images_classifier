@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[37]:
 
 import gensim
 import jieba
@@ -11,19 +11,19 @@ import MySQLdb as mysql
 from numpy import*
 
 
-# In[2]:
+# In[38]:
 
-con = mysql.connect("localhost","root","123456","images_classifier",charset='utf8')
+con = mysql.connect("localhost","root","AILab@C408","images_classifier",charset='utf8')
 db = con.cursor()
 imagesVec = dict()
 
 
 # In[3]:
-
+print('init')
 model = gensim.models.KeyedVectors.load_word2vec_format("wiki.zh.text.vector",binary=False)
 print('model initialization successfully')
 
-# In[34]:
+# In[117]:
 
 def getUserVecByDB(user_id):
     global db
@@ -46,7 +46,7 @@ def getImageVecByDB():
     #imagesVec = dict()
     if len(imagesVec)== 0:
         #初始化全部图像信息
-        db.execute('SELECT image_id,label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE status = 1 and is_del = 0) ')
+        db.execute('SELECT image_id,label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE is_del = 0) ')
         allImages = db.fetchall()
         #print allImages
         for image in allImages:
@@ -67,7 +67,7 @@ def getImageVecByDB():
             imagesVec[image_id] = imageVec
     else:
         #否则的话只更新信息更新了的图片
-        db.execute('SELECT image_id,label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE updated = 1 and status = 1 and is_del = 0)')
+        db.execute('SELECT image_id,label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE updated = 1 and is_del = 0)')
         updatedImages = db.fetchall()
         db.execute('UPDATE image SET updated = 0 WHERE updated = 1')
         updatedimagesVec = dict()
@@ -134,12 +134,14 @@ def calculateSimlar(user_id):
     simlarValue = dict()
     userVec = getUserVecByDB(user_id)
     AllUserMarkedImages = getAllUserMarkedImages(user_id)
+    #print imagesVec
     getImageVecByDB()
     for image_id in imagesVec:
         if image_id not in AllUserMarkedImages:
             simlarValue[image_id] = cos(userVec,imagesVec[image_id])
     temp = sorted(simlarValue.iteritems(), key=lambda a:a[1], reverse = True)
     simlarValue = []
+    #print temp
     for obj in temp:
         if obj[1]>0.5:
             simlarValue.append(obj[0])
@@ -152,6 +154,7 @@ def getImagesByLabels(labels):
         seg_list = jieba.cut(label,cut_all=False)
         for word in seg_list:
             if word in model:
+                #print word
                 vecs.append(model[word])
         vecs = np.array(vecs)
         if len(vecs) == 0:
@@ -167,26 +170,25 @@ def searchVaguelyImages(labels):
     imageIds = []
     labelsVec = getImagesByLabels(labels)
     getImageVecByDB()
+    #print imagesVec
     for labelVec in labelsVec:
-        simlarValue = dict()
-        for image_id in imagesVec:
-            simlarValue[image_id] = cos(labelVec,imagesVec[image_id])
-        temp = sorted(simlarValue.iteritems(), key=lambda a:a[1], reverse = True)
-        print temp
-        simlarValue = []
-        for obj in temp:
-            if obj[1]>0:
-                simlarValue.append(obj[0])
-        imageIds.append(simlarValue)
+        #print labelVec
+        if len(labelVec) == 0:
+            imageIds.append([])
+        else:
+            simlarValue = dict()
+            for image_id in imagesVec:
+                simlarValue[image_id] = cos(labelVec,imagesVec[image_id])
+            temp = sorted(simlarValue.iteritems(), key=lambda a:a[1], reverse = True)
+            simlarValue = []
+            for obj in temp:
+                if obj[1]>0:
+                    simlarValue.append(obj[0])
+            imageIds.append(simlarValue)
     return imageIds
 
 
-# In[35]:
-
-searchVaguelyImages(['大熊猫','轿车'])
-
-
-# In[ ]:
+# In[63]:
 
 
 import socket,time
@@ -206,6 +208,7 @@ while True:
         parameters = buf.split(':')
         if parameters[0] == 'push':
             #push图片
+            user_id = parameters[1]
             simlarValue = calculateSimlar(user_id)
             json_string = json.dumps(simlarValue)
         else:
@@ -213,7 +216,6 @@ while True:
             labels = parameters[1].split(',')
             imageIds = searchVaguelyImages(labels)
             json_string = json.dumps(imageIds)
-        #print json_string
         connection.send(json_string) #sendall() 发送完整的TCP连接数据
         connection.close()
         
@@ -221,4 +223,9 @@ while True:
         connection.close()
     #else:
     #connection.close() #传输结束，服务器调用socket的close方法关闭连接，之后client还可以重新发起连接传输数据
+
+
+# In[ ]:
+
+
 
