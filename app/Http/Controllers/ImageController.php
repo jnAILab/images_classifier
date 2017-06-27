@@ -256,11 +256,12 @@
             //$imageLocation = array();
             $getLocation = new Image();
             $imageLocation = $getLocation->getImageLocationInImage($image_ids);
-            $newLocation = 'download/' . $user_id;//下载文件夹打包地址
+            $newLocation = 'download/' . $user_id.'/';//下载文件夹打包地址
 
 
-            if (!is_dir('download/' . $user_id)) {
-                mkdir("download/" . $user_id);
+
+            if (!is_dir('download/' . $user_id.'/')) {
+                mkdir("download/" . $user_id.'/');
             } else {//删除
                 $allImage = glob($newLocation . '/*');
                 foreach ($allImage as $file) {
@@ -270,8 +271,14 @@
                     //mkdir("Image/download/" . $user_id);
                 }
             }
-            foreach ($imageLocation as $location){
-                exec("cp $location $newLocation");//拷贝图片
+            foreach ($imageLocation as $location) {
+                echo $location;
+//                exec('chmod 777 '.$location);
+//                exec('cp '. $location.' '. $newLocation);
+                $name =basename($location);
+
+                //echo $newLocation.$name;
+                copy($location, $newLocation.$name);
             }
 
             if (!is_file($user_id . '.zip')) {
