@@ -229,7 +229,7 @@
 
 
 
-        /**
+		/**
          * @author dain 2017.6.4 15:00
          * 根据图片id 将图片移动到以当前用户user_id命名的文件夹进行打包
          * @param $request
@@ -272,7 +272,7 @@
                 }
             }
             foreach ($imageLocation as $location) {
-                echo $location;
+                //echo $location;
 //                exec('chmod 777 '.$location);
 //                exec('cp '. $location.' '. $newLocation);
                 $name =basename($location);
@@ -321,6 +321,7 @@
                 }
             }
         }
+
 
         public function getLabeledImageNumber(Request $request){
             $imageLabelObj = new Image_Label();
