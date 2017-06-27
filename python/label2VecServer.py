@@ -195,7 +195,7 @@ def searchVaguelyImages(labels):
 
 
 import socket,time
-host='0.0.0.0'
+host='127.0.0.1'
 port=12308
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM) #定义socket类型
 s.bind((host,port)) #绑定需要监听的Ip和端口号，tuple格式
