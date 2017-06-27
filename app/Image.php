@@ -47,7 +47,7 @@ class Image extends Model{
     }
 
     public function getImagesBySocket($user_id){
-        $host = 'tcp://122.112.253.167:12308';
+        $host = 'tcp://127.0.0.1:12308';
         $fp = stream_socket_client ( $host, $errno, $error, 20 );
         if(!$fp){
             echo "$error ($errno)";

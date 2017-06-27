@@ -118,7 +118,10 @@ def text2vec(text):
 def cos(vector1,vector2):
     #vector1 = vector1[0][0]
     #vector2 = vector2[0][0]
-    return dot(vector1,vector2)/(linalg.norm(vector1)*linalg.norm(vector2))
+    if linalg.norm(vector1)*linalg.norm(vector2) == 0:
+    	return 0
+    else:
+    	return dot(vector1,vector2)/(linalg.norm(vector1)*linalg.norm(vector2))
     
 def getAllUserMarkedImages(user_id):
     db.execute('SELECT image_id FROM image_label WHERE users_added LIKE "%'+user_id+'%"');
@@ -182,7 +185,7 @@ def searchVaguelyImages(labels):
             temp = sorted(simlarValue.iteritems(), key=lambda a:a[1], reverse = True)
             simlarValue = []
             for obj in temp:
-                if obj[1]>0:
+                if obj[1]>0.1:
                     simlarValue.append(obj[0])
             imageIds.append(simlarValue)
     return imageIds
@@ -201,7 +204,7 @@ print('socket started')
 #建立长连接，数据传输完成后连接不自动关闭，等待超时自动关闭
 while True:
     connection,address=s.accept()
-    #print('Connected by ',address)
+    print('Connected by ',address)
     try:
         connection.settimeout(5) #定义超时时间
         buf = connection.recv(1049) #服务端接收到的从客户端发送过来的数据。在Python3中接收到的数据默认格式为bytes，需要进行解码转换为string

@@ -87,8 +87,13 @@
         public function searchVaguelyImages(Request $request){
             $labels = $request -> input("reach");
             $imageObj = new Image();
-            $image_ids = $imageObj->searchVaguelyImages($labels);
-            return $image_ids;
+            $labels_images = array();
+            $label_image_ids = $imageObj->searchVaguelyImages($labels);
+            foreach($label_image_ids as $image_ids){
+                $images = Image::select('image_location','image_id','status','spread_time','is_del')->whereIn('image_id',$image_ids)->get();
+                $labels_images[] = $images->toArray();
+            }
+            return $labels_images;
         }
 
         /**
