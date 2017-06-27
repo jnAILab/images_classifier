@@ -102,7 +102,8 @@ class Label extends Model{
                     [
                         'spread_time'=>0,//图片开始正式分类，传播次数重新置零
                         'status'=>1,//该图片开始正式分类
-                        'updated'=>1//图片信息进行过更新
+                        'updated'=>1,//图片信息进行过更新
+                        'updated_at'=>date('Y-m-d H:i:s')
                     ]
                 );
             }
@@ -112,7 +113,9 @@ class Label extends Model{
                     ->update(
                         [
                             'status'=>2,//该图片结束分类
-                            'updated'=>0
+                            'updated'=>1,
+                            'updated_at'=>date('Y-m-d H:i:s'),
+                            'end_time'=>date('Y-m-d H:i:s')
                         ]
                     );
             }
@@ -370,13 +373,21 @@ class Label extends Model{
      * @param image_id
      *
      */
-    public function imageExecl(){
 
+    public function getAllImage(){
         //获取不重复的所有的图片id
         $images= Image_Label::select('image_id')
             ->distinct()
             ->get();
-
+        return imageExecl($images);
+    }
+    public function getImagesByImageIds($image_ids){
+        $images= Image_Label::select('image_id')
+            ->whereIn('image_id',$image_ids)
+            ->get();
+        return imageExecl($images);
+    }
+    public function imageExecl($images){
         //获取信息
         $data=array();
         $number=0;
