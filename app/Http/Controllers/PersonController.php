@@ -308,17 +308,19 @@ class PersonController extends Controller
         $timeAxis = ['五周前','四周前','三周前','二周前','一周前','当前周'];
         $common = new Common();
         for ($i = 5;$i>0;$i--){
-            $startDay = date("Y-m-d 00:00:00",strtotime("-{$i} week Monday"));
+            $j = $i+1;
+            $startDay = date("Y-m-d 00:00:00",strtotime("-{$j} week Monday"));
             $endDay = date("Y-m-d 23:59:59",strtotime("-{$i} week Sunday"));
             $number[] = $common->getImageData($startDay,$endDay);
         }
-        $startDay = date("Y-m-d 00:00:00",strtotime("+0 week Monday"));
+        $startDay = date("Y-m-d 00:00:00",strtotime("-1 week Monday"));
         $endDay = date("Y-m-d 23:59:59",strtotime("+0 week Sunday"));
         $number[] = $common->getImageData($startDay,$endDay);
         $data['timeAxis'] = $timeAxis;
         $data['number'] = $number;
         return Common::returnJsonResponse(1,'成功',$data);
     }
+
 
     /**
      *
