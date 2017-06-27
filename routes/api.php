@@ -213,7 +213,7 @@ $api->version('v1', function ($api) {
             "uses"=>'App\Http\Controllers\ImageController@imageSignNumber'
         ]);
         //查看图片信息
-        $api->post('imageInfomration',[
+        $api->post('imageInformation',[
             "uses"=>'App\Http\Controllers\ImageController@imageInfomration'
         ]);
         /*
