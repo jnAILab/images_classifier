@@ -330,7 +330,7 @@ class PersonController extends Controller
     public function getActiveUser()
     {
         date_default_timezone_set('PRC');
-        $Atimes = DB::table('users')->select('updated_at')->get()->toArray();
+        $Atimes = DB::table('users')->select('updated_at')->where('status','client')->get()->toArray();
         //var_dump($Atimes);
         $allUsers = 0;
         $activeUsers = 0;
