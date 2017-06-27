@@ -343,7 +343,7 @@ class PersonController extends Controller
             //var_dump($week);
             $nowWeek = date('Y-m-d',time());
             $dayNum = $this->weekToweek($week,$nowWeek);
-            var_dump($dayNum);
+            /*var_dump($dayNum);*/
             if($dayNum <= 6)
             {
                 $activeUsers++;
