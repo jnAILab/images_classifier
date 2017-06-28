@@ -243,7 +243,7 @@ class LabelController extends Controller
      */
     public function seeExport(Request $request){
         $label = new Label();
-        $results = $label->imageExecl()['otherInformation'];
+        $results = $label->getAllImage()['otherInformation'];
         return Common::returnJsonResponse(1,'查找成功',$results);
     }
     /**

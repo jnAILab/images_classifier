@@ -379,13 +379,13 @@ class Label extends Model{
         $images= Image_Label::select('image_id')
             ->distinct()
             ->get();
-        return imageExecl($images);
+        return self::imageExecl($images);
     }
     public function getImagesByImageIds($image_ids){
         $images= Image_Label::select('image_id')
             ->whereIn('image_id',$image_ids)
             ->get();
-        return imageExecl($images);
+        return self::imageExecl($images);
     }
     public function imageExecl($images){
         //获取信息
