@@ -44,36 +44,59 @@ $api->version('v1', function ($api) {
             'as' => 'api.auth.invalidate'
         ]);
        /**
-	*author 范留山
-	*/
+        *author 范留山
+        */
         //添加管理员
         $api->post('/addAdministrator',[
             'uses'=>'App\Http\Controllers\PersonController@addAdmin',
             'middleware' => 'addAdmin'
         ]);
 
-        /**
-	*author 范留山
-	*/
-	//查看一个任务信息
-	$api->post('/taskInformation',[
-		'uses' => 'App\Http\Controllers\TaskController@getTasks',
-	]);
+        //查看一个任务信息
+        $api->post('/taskInformation',[
+            'uses' => 'App\Http\Controllers\TaskController@getTasks',
+        ]);
+        //更新一个任务信息
+        $api->post('/updateTask',[
+            'uses' => 'App\Http\Controllers\TaskController@updateTask',
+        ]);
+        //删除任务信息（可批量）
+        $api->post('/delectTask',[
+            'uses' => 'App\Http\Controllers\TaskController@delectTask',
+        ]);
+        //任务列表
+        $api->post('/taskList',[
+            'uses' => 'App\Http\Controllers\TaskController@getTaskList',
+        ]);
 
-	//更新一个任务信息
-	$api->post('/updateTask',[
-		'uses' => 'App\Http\Controllers\TaskController@updateTask',
-	]);
-		
-	//删除任务信息（可批量）
-	$api->post('/delectTask',[
-		'uses' => 'App\Http\Controllers\TaskController@delectTask',
-	]);
-    //任务列表
-    $api->post('/taskList',[
-        'uses' => 'App\Http\Controllers\TaskController@getTaskList',
-    ]);
+        //用户列表
+        $api->post('showUserList',[
+            'uses'=>'App\Http\Controllers\PersonController@showUserList'
+        ]);
 
+        //查看图片列表
+        $api->post('seeExport', [
+            'uses' => 'App\Http\Controllers\LabelController@seeExport'
+        ]);
+        //下载 图片id，对该图片进行过标注的用户（数组返回用户名），该图片已经有的标签（数组返回标签名）
+        $api->get('imageExecl', [
+            'uses' => 'App\Http\Controllers\LabelController@imageExecl'
+        ]);
+
+        //显示图片标记信息的函数
+        $api->post('getImageMarkedInformation',[
+            "uses"=>'App\Http\Controllers\ImageController@getImageMarkedInformation'
+        ]);
+        //图片标记数
+        $api->post('imageSignNumber',[
+            "uses"=>'App\Http\Controllers\ImageController@imageSignNumber'
+        ]);
+        //查看图片信息
+        $api->post('imageInformation',[
+            "uses"=>'App\Http\Controllers\ImageController@imageInfomration'
+        ]);
+
+        
         /**
          *author 张政茂
          */
@@ -126,16 +149,9 @@ $api->version('v1', function ($api) {
             'uses'=>'App\Http\Controllers\PersonController@getImageData'
         ]);
 
-        /*
-         * 范留山
-         * **/
-    $api->post('showUserList',[
-        'uses'=>'App\Http\Controllers\PersonController@showUserList'
-    ]);
-
-        	/**
-	*author 葛操
-	*/
+        /**
+        *author 葛操
+        */
         $api->post('getActiveUser',[
             'uses'=>'App\Http\Controllers\PersonController@getActiveUser'
         ]);
@@ -193,28 +209,6 @@ $api->version('v1', function ($api) {
         ]);
         $api->post('searchVaguelyImages',[
             'uses'=>'App\Http\Controllers\ImageController@searchVaguelyImages',
-        ]);
-
-        /*范留山s*/
-        //查看 图片id，对该图片进行过标注的用户（数组返回用户名），该图片已经有的标签（数组返回标签名）
-        $api->post('seeExport', [
-            'uses' => 'App\Http\Controllers\LabelController@seeExport'
-        ]);
-        //下载 图片id，对该图片进行过标注的用户（数组返回用户名），该图片已经有的标签（数组返回标签名）
-        $api->get('imageExecl', [
-            'uses' => 'App\Http\Controllers\LabelController@imageExecl'
-        ]);
-        //显示图片标记信息的函数
-        $api->post('getImageMarkedInformation',[
-            "uses"=>'App\Http\Controllers\ImageController@getImageMarkedInformation'
-        ]);
-        //图片标记数
-        $api->post('imageSignNumber',[
-            "uses"=>'App\Http\Controllers\ImageController@imageSignNumber'
-        ]);
-        //查看图片信息
-        $api->post('imageInformation',[
-            "uses"=>'App\Http\Controllers\ImageController@imageInfomration'
         ]);
         /*
          * auth 田荣鑫

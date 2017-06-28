@@ -378,7 +378,7 @@ class Label extends Model{
         //获取不重复的所有的图片id
         $images= Image_Label::select('image_id')
             ->distinct()
-            ->get();
+            ->paginate(10);
         return self::imageExecl($images);
     }
     public function getImagesByImageIds($image_ids){
@@ -443,15 +443,20 @@ class Label extends Model{
                 }
 
             }
+            //查看图片列表的
             $otherInformation[$number]['image_id']=$imageId;
             $otherInformation[$number]['label_name_list']=$labelName;
+            $page=Image_Label::paginate();
+            $page=json_decode(json_encode($page),true);
+            unset($page['data']);
+            $otherInformation['page']=$page;
             if(isset($image_location)){
                 $otherInformation[$number]['image_location']=$image_location['image_location'];
             }else{
-                $otherInformation[$number]['image_location']=$image_location['未找到图片位置'];
+                $otherInformation[$number]['image_location']='未找到图片位置';
             }
-
             $number+=1;
+            //下载表格的
             $finallyInformation[$imageId]['label_name_list']=$labelName;
             $finallyInformation[$imageId]['user_id_list']=$userIdsListOne;
         }
