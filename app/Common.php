@@ -177,7 +177,7 @@ class Common extends Model
      * @return table_name
      */
     public static function generateDatabaseNamesByClientId($user_id){
-        //$tablesName = array();
+        $tablesName = array();
         $defineArray = array('clients','admins','image','image_label','label','	migrations','password_resets','users');
         $tableTopName = substr($user_id,-1);//获取用户id的最后一个字符
         //$tableResult = DB::select("SHOW TABLES LIKE '$tableTailName%'");

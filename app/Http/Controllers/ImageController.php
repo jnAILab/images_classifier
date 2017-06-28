@@ -66,6 +66,8 @@
             $image_ids = $imageObj->pushImage($user);
             if($image_ids === null){
                 return Common::returnJsonResponse(0,'image\'s set is null','null');
+            }elseif($image_ids === false){
+                return Common::returnJsonResponse(0,'只能向用户推送图片','null');
             }
             //var_dump($image_ids);
             //return;
@@ -75,6 +77,7 @@
             }
             $images = Image::select('image_location','image_id')->whereIn('image_id',$image_ids)->get();
             $message = $images->toArray();
+
             foreach($message as $index =>$item){
                 $message[$index][] =$task_ids[$item['image_id']];
             }

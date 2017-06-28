@@ -32,6 +32,7 @@ class Image extends Model{
             if($userCheckResult === true){
                 //当前用户未因注册用户，即无标记信息。则在所有的图片库里面随机抽取50张图片
                 //（50张图片= 20张预分类图片+30张正式分类图片。若该用户注册时，预分类的图片已被分配完毕，则分配50张随机图片）
+
                 return $this->randomGetImageIds($user->user_id);
             }else{
                 //根据用户的喜好分配200张图片

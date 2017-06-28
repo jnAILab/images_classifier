@@ -378,6 +378,7 @@ class Label extends Model{
         //获取不重复的所有的图片id
         $images= Image_Label::select('image_id')
             ->distinct()
+            ->where('is_del',0)
             ->paginate(10);
         return self::imageExecl($images);
     }
@@ -444,12 +445,16 @@ class Label extends Model{
 
             }
             //查看图片列表的
-            $otherInformation[$number]['image_id']=$imageId;
-            $otherInformation[$number]['label_name_list']=$labelName;
+            $pageNumber=ceil(count($images)/10);
             $page=Image_Label::paginate();
             $page=json_decode(json_encode($page),true);
             unset($page['data']);
+            $page['last_page']=$pageNumber;
+            $page['total']=count($images);
             $otherInformation['page']=$page;
+
+            $otherInformation[$number]['image_id']=$imageId;
+            $otherInformation[$number]['label_name_list']=$labelName;
             if(isset($image_location)){
                 $otherInformation[$number]['image_location']=$image_location['image_location'];
             }else{
