@@ -260,7 +260,7 @@ class LabelController extends Controller
         if($is_all){
             $results = $label->getAllImage()['finallyInformation'];
         }else{
-            $image_ids = $request->input('image_ids');
+            $image_ids = json_decode($request->input('image_ids'));
             $results = $label->getImagesByImageIds($image_ids)['finallyInformation'];
         }
         //处理成二维数组，以便储存为excel   [[图片id1，标签名数组1，用户名数组1],[图片id2，标签名数组2，用户名数组2],……]

@@ -380,13 +380,13 @@ class Label extends Model{
             ->distinct()
             ->where('is_del',0)
             ->paginate(10);
-        return self::imageExecl($images);
+        return $this->imageExecl($images);
     }
     public function getImagesByImageIds($image_ids){
         $images= Image_Label::select('image_id')
             ->whereIn('image_id',$image_ids)
             ->get();
-        return self::imageExecl($images);
+        return $this->imageExecl($images);
     }
     public function imageExecl($images){
         //获取信息
