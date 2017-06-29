@@ -96,7 +96,7 @@
                 $images = Image::select('image_location','image_id','status','spread_time','is_del')->whereIn('image_id',$image_ids)->get();
                 $labels_images[] = $images->toArray();
             }
-            return $labels_images;
+            return Common::returnJsonResponse(1,'reach successful',$labels_images);
         }
 
         /**
