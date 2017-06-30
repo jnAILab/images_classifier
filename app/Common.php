@@ -91,14 +91,9 @@ class Common extends Model
      */
     public function adminUpdateInformation($all,$user_id){
         $ResultCode = 0;
-        if (array_key_exists('like_image_class',$all)){
-            if($all['like_image_class']!=null){
-                $all['like_image_class']=json_encode($all['like_image_class']);
-            }
-        }
         $all = array_filter($all);
         $user_all = User::where('user_id', $user_id)->first()['attributes'];
-        $table_all = Client::where('user_id', '=', $user_id)->first()['attributes'];
+        $table_all = Admin::where('user_id', '=', $user_id)->first()['attributes'];
         //筛选数据，判断要更新的字段所属的表，并完成更新。
         foreach ($all as $key=>$value){
             if (array_key_exists($key,$user_all)){
@@ -106,8 +101,8 @@ class Common extends Model
                     [$key=>$value,'updated_at'=>date("Y-m-d h:i:s")]
                 );
             }
-            elseif (array_key_exists($key,$table_all)){
-                $ResultCode = Client::where('user_id', '=', $user_id)->update(
+            else if (array_key_exists($key,$table_all)){
+                $ResultCode = Admin::where('user_id', '=', $user_id)->update(
                     [$key=>$value,'updated_at'=>date("Y-m-d h:i:s")]
                 );
             }
