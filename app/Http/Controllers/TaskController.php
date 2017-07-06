@@ -28,6 +28,12 @@
 			$userId = JWTAuth::parseToken()->authenticate()->user_id;
 			$imageId = $request->input("sendImageId");
 			$taskId=$request->input('sendTaskId');
+			if(empty($imageId)||empty($taskId)){
+			    return Common::returnJsonResponse(0,'接收的参数列表为空',null);
+            }
+			//echo "sdasdsdasdds";
+			//var_dump($request->all());
+			//return;
 			$task = new Task();
 			$data = $task -> getTasksInformation($userId,$taskId,$imageId);
 			return Common::returnJsonResponse(1,'成功返回任务信息',$data);

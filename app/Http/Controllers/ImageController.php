@@ -79,8 +79,9 @@
             $message = $images->toArray();
 
             foreach($message as $index =>$item){
-                $message[$index][] =$task_ids[$item['image_id']];
+                $message[$index] = array_merge($message[$index],$task_ids[$item['image_id']]);
             }
+            //var_dump($message);
             if($image_ids === false){
                 return Common::returnJsonResponse(0,'failed to push a image','null');
             }else{
