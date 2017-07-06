@@ -43,7 +43,7 @@ class Image_Label extends Model
             $users_added[] = $user_id;
             $users_added = array_unique($users_added);
             $remind = $this->whereRaw('image_id = ? and label_id = ?',[$image_id,$label_id])
-                ->update(['users_added'=>json_encode($users_added)]);
+                ->update(['users_added'=>json_encode($users_added),'is_del'=>0]);
         }
         //判断一下是否添加成功
         if($remind){
