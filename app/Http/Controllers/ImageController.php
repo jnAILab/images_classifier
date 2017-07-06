@@ -197,7 +197,7 @@
                 if(in_array($image_extend,$extends)){
                     $newImageName = md5($image);
                     $newImageNames = $newImageName.'.'.$image_extend;
-                    $bool1 = rename($path.$image_name.'.'.$image_extend,'Image/'.$newImageName);
+                    $bool1 = rename($path.$image_name.'.'.$image_extend,'Image/'.$newImageNames);
                     if(!(in_array($newImageName,$image_idArray)))
                     {
                         Image::create(
@@ -210,13 +210,22 @@
                             ]
                         );
                         //随机选取20个用户 并分配任务
-                        $randomkeys = array_rand($userArray,20);
-                        foreach ($randomkeys as $randomkey)
+                        //如果用户不足20个 则全部选取
+                        if(count($userArray)<=20)
                         {
-                            //var_dump($userArray[$randomkey]);
-                            $result = $task->createTaskMarkImage($userArray[$randomkey],$newImageName);
-                            //var_dump($result);
+                            foreach ($userArray as $user_id) {
+                                $result = $task->createTaskMarkImage($user_id,$newImageName);
+                            }
+                        }else{
+                            $randomkeys = array_rand($userArray,20);
+                            foreach ($randomkeys as $randomkey)
+                            {
+                                //var_dump($userArray[$randomkey]);
+                                $result = $task->createTaskMarkImage($userArray[$randomkey],$newImageName);
+                                //var_dump($result);
+                            }
                         }
+
                     }
 
 

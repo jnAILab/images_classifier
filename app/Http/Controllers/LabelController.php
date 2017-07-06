@@ -307,7 +307,7 @@ class LabelController extends Controller
     public function getNewAddLabelNumber()
     {
 
-
+        $defaultTimeAxis= array('本周','一周前','二周前','三周前','四周前','五周前');
         $timeAxis =[];
         $number =[];
         $all = [];
@@ -315,13 +315,15 @@ class LabelController extends Controller
         for ($num1 = 5;$num1 >= 0;$num1--)
         {
             date_default_timezone_set('PRC');
+
             $Label = new Label();
             $startDay = ($num1+1)*7;
             $endDay = $num1*7;
             $startTime = date('Y-m-d H:i:s',strtotime("-{$startDay} day"));
             $endTime = date('Y-m-d H:i:s',strtotime("-{$endDay} day"));
             $label = $Label::whereBetween('created_at',[$startTime,$endTime])->get();
-            $timeAxis[$i] = "{$num1}周前";
+            //echo $timeAxis[$num1];
+            $timeAxis[$i] = $defaultTimeAxis[$num1];
             $number[$i] =  count($label);
             $i++;
         }

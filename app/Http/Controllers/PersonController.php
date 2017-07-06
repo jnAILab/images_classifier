@@ -305,7 +305,7 @@ class PersonController extends Controller
         date_default_timezone_set('PRC');
         $data = [];
         $number = [];
-        $timeAxis = ['五周前','四周前','三周前','二周前','一周前','当前周'];
+        $timeAxis = ['五周前','四周前','三周前','二周前','一周前','本周'];
         $common = new Common();
         for ($i = 5;$i>0;$i--){
             $j = $i+1;
