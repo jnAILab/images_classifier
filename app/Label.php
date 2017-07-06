@@ -119,6 +119,7 @@ class Label extends Model{
                         ]
                     );
                 $weight = $this->getWeightBySocket('weight:'.$user_id.','.$image_id);
+                $weight = $weight[0];
                 $cilent = Client::where('user_id',$user_id)->first();
                 Client::where('user_id',$user_id)->update(['user_points'=>(int)($cilent->user_points)+(100*$weight)]);
             }
@@ -142,7 +143,7 @@ class Label extends Model{
             }
             fclose ($fp);
         }
-        return $weight;
+        return json_decode($weight);
     }
 
 
