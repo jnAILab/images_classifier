@@ -44,8 +44,9 @@ def getUserVecByImage(user_id,image_id):
     global db
     userLabelVecs = []
     userVec = []
-    db.execute('SELECT label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE users_added LIKE "%'+user_id+'%" and image_label.image_id ="'+image_id+'"')
+    db.execute('SELECT label_name,like_number FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE users_added LIKE "%'+user_id+'%" and image_label.image_id ="'+image_id+'"')
     userLabels = db.fetchall()
+    #print userLabels
     for labelTup in userLabels:
         text = labelTup[0].encode('utf8')
         vec = text2vec(text)
@@ -63,28 +64,33 @@ def getImageVecByDB():
     #imagesVec = dict()
     if len(imagesVec)== 0:
         #初始化全部图像信息
-        db.execute('SELECT image_id,label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE is_del = 0) ')
+        db.execute('SELECT image_id,label_name,like_number FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE is_del = 0) ')
         allImages = db.fetchall()
         #print allImages
         for image in allImages:
             image_id = image[0].encode('utf8')
             label_name = image[1].encode('utf8')
-           
             if not imagesVec.has_key(image_id):
                 imagesVec[image_id] = []
-            imagesVec[image_id].append(label_name)
+            imagesVec[image_id].append(label_name+':'+str(image[2]))
         for image_id in imagesVec:
             imageVec = []
+            total = 0
             for label_name in imagesVec[image_id]:
-                vec = text2vec(label_name)
+                temp = label_name.split(':')
+                vec = text2vec(temp[0])
+                vec = np.array(vec)
+                vec = vec*long(temp[1])
+                total += long(temp[1])
                 if len(vec) != 0:
                     imageVec.append(vec.tolist())
             imageVec = np.array(imageVec)
             imageVec = np.sum(imageVec,axis=0).tolist()
-            imagesVec[image_id] = imageVec
+            imageVec = np.array(imageVec)
+            imagesVec[image_id] = imageVec/total
     else:
         #否则的话只更新信息更新了的图片
-        db.execute('SELECT image_id,label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE updated = 1 and is_del = 0)')
+        db.execute('SELECT image_id,label_name,like_number FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE image_id in(SELECT image_id FROM image WHERE updated = 1 and is_del = 0)')
         updatedImages = db.fetchall()
         db.execute('UPDATE image SET updated = 0 WHERE updated = 1')
         updatedimagesVec = dict()
@@ -92,30 +98,25 @@ def getImageVecByDB():
         for image in updatedImages:
             image_id = image[0].encode('utf8')
             label_name = image[1].encode('utf8')
-
             if not updatedimagesVec.has_key(image_id):
                 updatedimagesVec[image_id] = []
-            updatedimagesVec[image_id].append(label_name)
+            updatedimagesVec[image_id].append(label_name+":"+str(image[2]))
         for image_id in updatedimagesVec:
             imageVec = []
-            for label_name in updatedimagesVec[image_id]:
-                vec = text2vec(label_name)
+            total = 0
+            for label_name in imagesVec[image_id]:
+                temp = label_name.split(':')
+                vec = text2vec(temp[0])
+                vec = np.array(vec)
+                vec = vec*long(temp[1])
+                total += long(temp[1])
                 if len(vec) != 0:
                     imageVec.append(vec.tolist())
             imageVec = np.array(imageVec)
             imageVec = np.sum(imageVec,axis=0).tolist()
-            imagesVec[image_id] = imageVec
-    
-    #删除已经标记结束的图片
-    #print imagesVec['8c9df18b392ec80f5ec59d77901f6035']
-    #db.execute('UPDATE image SET status = 0 WHERE  1')
-    #db.execute('SELECT image_id FROM image WHERE status = 2')
-    #needToDeleteImages = db.fetchall()
-    #for image in needToDeleteImages:
-    #    image_id = image[0].encode('utf8')
-    #    if imagesVec.has_key(image_id):
-    #        imagesVec.pop(image_id)
-    #print imagesVec['8c9df18b392ec80f5ec59d77901f6035']
+            imageVec = np.array(imageVec)
+            imagesVec[image_id] = imageVec/total
+
         
 
 def text2vec(text):

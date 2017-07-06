@@ -29,7 +29,7 @@ class Client extends Model
 
         $result = DB::table('users')
             ->join('clients','clients.user_id','users.user_id')
-            ->select('name','realname','sex','idcarnumber','email')
+            ->select('name','realname','sex','idcarnumber','email','user_points')
             ->where('users.user_id',$user_id)
             ->first();
         return $result;
