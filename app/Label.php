@@ -118,6 +118,9 @@ class Label extends Model{
                             'end_time'=>date('Y-m-d H:i:s')
                         ]
                     );
+                $weight = $this->getWeightBySocket('weight:'.$user_id.','.$image_id);
+                $cilent = Client::where('user_id',$user_id)->first();
+                Client::where('user_id',$user_id)->update(['user_points'=>(int)($cilent->user_points)+(100*$weight)]);
             }
         }
         if($result){
@@ -126,6 +129,22 @@ class Label extends Model{
             return false;
         }
     }
+
+    public function getWeightBySocket($parameter){
+        $host = 'tcp://127.0.0.1:12308';
+        $fp = stream_socket_client ( $host, $errno, $error, 20 );
+        if(!$fp){
+            echo "$error ($errno)";
+        }else{
+            fwrite ($fp,$parameter);
+            while (!feof($fp)){
+                $weight = fgets($fp); #获取服务器返回的内容
+            }
+            fclose ($fp);
+        }
+        return $weight;
+    }
+
 
     /**
      * @auther 张政茂

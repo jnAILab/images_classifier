@@ -40,6 +40,23 @@ def getUserVecByDB(user_id):
     userVec = np.sum(userLabelVecs,axis=0).tolist()
     return userVec
 
+def getUserVecByImage(user_id,image_id):
+    global db
+    userLabelVecs = []
+    userVec = []
+    db.execute('SELECT label_name FROM image_label INNER JOIN label ON label.label_id = image_label.label_id WHERE users_added LIKE "%'+user_id+'%" and image_label.image_id ="'+image_id+'"')
+    userLabels = db.fetchall()
+    for labelTup in userLabels:
+        text = labelTup[0].encode('utf8')
+        vec = text2vec(text)
+        if len(vec) != 0:
+            userLabelVecs.append(vec.tolist())
+    userLabelVecs = np.array(userLabelVecs)
+    userVec = np.sum(userLabelVecs,axis=0).tolist()
+    return userVec
+
+
+
 
 def getImageVecByDB():
     global imagesVec,db
@@ -130,8 +147,12 @@ def getAllUserMarkedImages(user_id):
     for image in ResultAllUserMarkedImages:
         AllUserMarkedImages.append(image[0].encode('utf8'))
     return AllUserMarkedImages
-    
-    
+
+def calculateWeight(user_id,image_id):
+    global imagesVec
+    userVec = getUserVecByImage(user_id)
+    weight = cos(userVec,imagesVec[image_id])
+    return [weight]
 def calculateSimlar(user_id):
     global imagesVec
     simlarValue = dict()
@@ -214,11 +235,17 @@ while True:
             user_id = parameters[1]
             simlarValue = calculateSimlar(user_id)
             json_string = json.dumps(simlarValue)
-        else:
+        else if parameters[0] == 'search':
             #模糊查找
             labels = parameters[1].split(',')
             imageIds = searchVaguelyImages(labels)
             json_string = json.dumps(imageIds)
+        else:
+            temp = parameters[1].split(',')
+            user_id = temp[0]
+            image_id = temp[1]
+            weight = calculateWeight(user_id,image_id)
+            json_string = json.dumps(weight)
         connection.send(json_string) #sendall() 发送完整的TCP连接数据
         connection.close()
         
