@@ -149,11 +149,19 @@ def getAllUserMarkedImages(user_id):
         AllUserMarkedImages.append(image[0].encode('utf8'))
     return AllUserMarkedImages
 
-def calculateWeight(user_id,image_id):
+def calculateWeight(image_id):
     global imagesVec
-    userVec = getUserVecByImage(user_id)
-    weight = cos(userVec,imagesVec[image_id])
-    return [weight]
+    getImageVecByDB()
+    db.execute('SELECT users_added FROM image_label WHERE image_id LIKE "%'+image_id+'%"');
+    ResultAllUsersAdded = db.fetchall()
+    allWeight = dict()
+    for imageElement in ResultAllUsersAdded:
+        for user_id in json.loads(imageElement[0]):
+            userVec = getUserVecByImage(user_id,image_id)
+            weight = cos(userVec,imagesVec[image_id])
+        allWeight[user_id] = weight
+    return allWeight
+
 def calculateSimlar(user_id):
     global imagesVec
     simlarValue = dict()
@@ -242,11 +250,9 @@ while True:
             imageIds = searchVaguelyImages(labels)
             json_string = json.dumps(imageIds)
         else:
-            temp = parameters[1].split(',')
-            user_id = temp[0]
-            image_id = temp[1]
-            weight = calculateWeight(user_id,image_id)
-            json_string = json.dumps(weight)
+            image_id = parameters[1]
+            allWeight = calculateWeight(image_id)
+            json_string = json.dumps(allWeight)
         connection.send(json_string) #sendall() 发送完整的TCP连接数据
         connection.close()
         

@@ -118,10 +118,11 @@ class Label extends Model{
                             'end_time'=>date('Y-m-d H:i:s')
                         ]
                     );
-                $weight = $this->getWeightBySocket('weight:'.$user_id.','.$image_id);
-                $weight = $weight[0];
-                $cilent = Client::where('user_id',$user_id)->first();
-                Client::where('user_id',$user_id)->update(['user_points'=>(int)($cilent->user_points)+(100*$weight)]);
+                $allWeight = $this->getWeightBySocket('weight:'.$image_id);
+                foreach($allWeight as $user_id => $weight){
+                    $client = Client::where('user_id',$user_id)->first();
+                    Client::where('user_id',$user_id)->update(['user_points'=>(int)($client->user_points)+(100*(int)($weight))]);
+                }
             }
         }
         if($result){
@@ -139,11 +140,11 @@ class Label extends Model{
         }else{
             fwrite ($fp,$parameter);
             while (!feof($fp)){
-                $weight = fgets($fp); #获取服务器返回的内容
+                $allWeight = fgets($fp); #获取服务器返回的内容
             }
             fclose ($fp);
         }
-        return json_decode($weight);
+        return json_decode($allWeight);
     }
 
 

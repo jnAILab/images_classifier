@@ -162,30 +162,30 @@ class LabelController extends Controller
      * }
      */
     public function recordLabelWithImage(Request $request){
-        //获取参数
-        $image_id = $request->input('image_id');
-        $label_name = $request->input('label_name');
-        $flag = $request->input('flag');
-        //$task_id = $request->input('task_id');
-        $user_id  = JWTAuth::parseToken()->authenticate()->user_id;
-        $table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
-        $task = DB::table($table_name)->select('task_id')->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
-        $task_id = $task->task_id;
-        $Label = new Label();
-        if($flag == -1){
-            //当前图片被跳过，只更新任务里面的状态即可。
-            $Label->skipImage($table_name,$task_id);
-            return Common::returnJsonResponse(1,'add successfully',$data = null);
-        }
-        $label_id = md5($label_name);
+            //获取参数
+            $image_id = $request->input('image_id');
+            $label_name = $request->input('label_name');
+            $flag = $request->input('flag');
+            //$task_id = $request->input('task_id');
+            $user_id  = JWTAuth::parseToken()->authenticate()->user_id;
+            $table_name = Common::generateDatabaseNamesByClientIdAndImageId($user_id,$image_id);
+            $task = DB::table($table_name)->select('task_id')->where('user_id','=',$user_id)->where('image_id','=',$image_id)->first();
+            $task_id = $task->task_id;
+            $Label = new Label();
+            if($flag == -1){
+                //当前图片被跳过，只更新任务里面的状态即可。
+                $Label->skipImage($table_name,$task_id);
+                return Common::returnJsonResponse(1,'add successfully',$data = null);
+            }
+            $label_id = md5($label_name);
 
-        //信息不完整
-        if(is_null($image_id)||is_null($label_name)||is_null($label_id)||is_null($user_id)||is_null($task_id)){
-            return Common::returnJsonResponse(0,'data is not complete',$data = null);
-        }
+            //信息不完整
+            if(is_null($image_id)||is_null($label_name)||is_null($label_id)||is_null($user_id)||is_null($task_id)){
+                return Common::returnJsonResponse(0,'data is not complete',$data = null);
+            }
 
-        //向label模型中传递参数，向storelabelcontent中传递
-        $result0 = $Label->storeLabelContent($user_id,$label_id,$label_name,$image_id,$task_id);
+            //向label模型中传递参数，向storelabelcontent中传递
+            $result0 = $Label->storeLabelContent($user_id,$label_id,$label_name,$image_id,$task_id);
         //var_dump($result0);
         //return;
         if(!$result0){
